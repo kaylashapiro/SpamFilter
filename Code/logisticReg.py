@@ -50,11 +50,11 @@ def computeCost(predictions, trueValues, n_instances):
 def costGradient(X, y, theta, j, n_instances): 
     grad_sum = 0
     
-    for i in range(0, n_instances)
+    for i in range(0, n_instances):
         x_i = X[i]
-        x_ij = X[j]
+        x_ij = x_i[j]
         
-        y_i = y[0][i]
+        y_i = y[i][0]
         
         h = hypothesis(theta, x_i)
         
@@ -62,7 +62,7 @@ def costGradient(X, y, theta, j, n_instances):
         
     grad = (1.0/float(n_instances)) * grad_sum
     
-    print 'The gradient is', grad
+    #print 'The gradient is', grad
     return grad
     
 
@@ -77,8 +77,12 @@ def gradientDescent(X, y, theta, n_instances, n_features, alpha):
     return new_theta
 
 # INPUT: X := 2D 
-def regLogisticRegression(X, y, theta, alpha, n_iters):
+def regLogisticRegression(X, y):
     n_instances, n_features = X.shape
+    
+    theta = [0] * n_features
+    alpha = 1
+    n_iters = 100
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
@@ -105,15 +109,15 @@ def main():
     #n_instances, n_features = X.shape
     #print n_instances, n_features
 
-    regLogisticRegression()
+    print 'Theta', regLogisticRegression(X,y)
     
-    prediction = sigmoid(2)
-    print prediction
+    #prediction = sigmoid(2)
+    #print prediction
     
-    cost = costFunction(prediction, 0)
-    print cost
+    #cost = costFunction(prediction, 0)
+    #print cost
     
-    computeCost([.98,.002,.89],[1,0,1], 2)
+    #computeCost([.98,.002,.89],[1,0,1], 2)
     
 
 
