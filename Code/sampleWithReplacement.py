@@ -27,11 +27,19 @@ def generateReplicate(X, new_instances):
     
 
 # Function to generate a certain number of replicate sets.
-# Currently just prints the replicates. But, will export to .csv files 
-# or feed directly into bagging algorithm
+# Saves as csv for specified path
 def generateBootstraps(X, new_instances, n_replicates):
+    folder = './Bootstraps/'
+
     for i in range(0, n_replicates):
         replicate = generateReplicate(X, new_instances)
+        
+        filename = 'replicate' + str(i+1) + '.csv'
+        out_name = folder + filename
+        
+        with open(out_name, 'wb') as ofile:
+            np.savetxt(ofile, replicate, fmt='%u', delimiter=',')
+        
         print replicate
         
         
