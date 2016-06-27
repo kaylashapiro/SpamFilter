@@ -76,7 +76,7 @@ def gradientDescent(X, y, theta, n_instances, n_features, alpha):
         
     return new_theta
 
-# INPUT: X := 2D 
+# X holds training instances, y holds their class values
 def regLogisticRegression(X, y):
     n_instances, n_features = X.shape
     
