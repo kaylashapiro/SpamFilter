@@ -30,8 +30,7 @@ def computeCost(X, theta, trueValues, n_instances):
     cost_sum = np.sum(trueValues * np.log(predictions) + (ones - trueValues) * np.log(ones - predictions))
     
     cost = -(1.0/n_instances)*cost_sum
-    
-    
+      
     print 'Cost:', cost
     
     return cost
@@ -54,7 +53,7 @@ def regLogisticRegression(X, y):
     
     theta = [0] * n_features
     alpha = 1
-    n_iters = 10000
+    n_iters = 100
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
@@ -63,13 +62,12 @@ def regLogisticRegression(X, y):
             print 'Iteration:', x
             #print 'Theta:', theta
             computeCost(X, theta, y, n_instances)
-
     
     return theta
     
     
 
-# Main function to write tests
+# Main function to write tests and run the regression
 def main():
 
     df_X = pd.read_csv('BinaryFeatures.csv', header = None)
@@ -86,19 +84,10 @@ def main():
     
     y = np.array(df_y).T[0]
     print y
-    
-    
+        
     theta = regLogisticRegression(X,y)    
     print 'Theta:', theta
-    
-    #prediction = sigmoid(2)
-    #print prediction
-    
-    #cost = costFunction(prediction, 0)
-    #print cost
-    
-    #computeCost([.98,.002,.89],[1,0,1], 2)
-    
+
 
 # Standard boilerplate to call the main() function to begin
 # the program.
