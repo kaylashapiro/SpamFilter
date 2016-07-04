@@ -70,7 +70,7 @@ def regLogisticRegression(X, y):
 # Main function to write tests and run the regression
 def main():
 
-    df_X = pd.read_csv('BinaryFeatures.csv', header = None)
+    df_X = pd.read_csv('Features.csv', header = None)
     #print df_X
     
     X = np.array(df_X) 
@@ -84,9 +84,11 @@ def main():
     
     y = np.array(df_y).T[0]
     print y
-        
-    theta = regLogisticRegression(X,y)    
-    print 'Theta:', theta
+    
+    X.shape
+    
+    #theta = regLogisticRegression(X,y)    
+    #print 'Theta:', theta
 
 
 # Standard boilerplate to call the main() function to begin

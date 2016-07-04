@@ -18,13 +18,21 @@ def hypothesis(theta, x):
     return prediction
 
 	
+def computePredictions(theta, X, n_instances):
+    predictions = []
+    
+    for i in range(0, n_instances):
+        predictions.append(hypothesis(theta, X[i]))
+        
+    return predictions
 
+    
 # Cost for a given training example
 def costFunction(prediction, trueValue):
     cost = trueValue * np.log(prediction) + (1 - trueValue) * np.log(1 - prediction)
     
-    print 'Prediction:', prediction, 'Class:', trueValue
-    print 'Cost of prediction:', cost
+    #print 'Prediction:', prediction, 'Class:', trueValue
+    #print 'Cost of prediction:', cost
 	
     return cost
 
@@ -37,10 +45,10 @@ def computeCost(predictions, trueValues, n_instances):
         cost_sum -= costFunction(predictions[instance], trueValues[instance])
     
     
-    print 'Sum cost is', cost_sum
+    #print 'Sum cost is', cost_sum
     
     cost = (1.0/n_instances)*cost_sum
-    print 'Cost is ', cost
+    print 'Cost:', cost
     
     return cost
     
@@ -54,7 +62,7 @@ def costGradient(X, y, theta, j, n_instances):
         x_i = X[i]
         x_ij = x_i[j]
         
-        y_i = y[i][0]
+        y_i = y[i]
         
         h = hypothesis(theta, x_i)
         
@@ -82,10 +90,17 @@ def regLogisticRegression(X, y):
     
     theta = [0] * n_features
     alpha = 1
-    n_iters = 100
+    n_iters = 1
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
+        
+        if x%1 == 0:
+            predictions = computePredictions(theta, X, n_instances)
+            #print 'Iteration:', x
+            #print 'Theta:', theta
+            computeCost(predictions, y, n_instances)
+
     
     return theta
     
@@ -94,7 +109,7 @@ def regLogisticRegression(X, y):
 # Main function to write tests
 def main():
 
-    df_X = pd.read_csv('BinaryFeatures.csv', header = None)
+    df_X = pd.read_csv('Features.csv', header = None)
     #print df_X
     
     X = np.array(df_X) 
@@ -103,13 +118,15 @@ def main():
     df_y = pd.read_csv('Labels.csv', header = None)
     #print df_y
     
-    y = np.array(df_y)
+    y = np.array(df_y).T[0]
     print y
     
     #n_instances, n_features = X.shape
     #print n_instances, n_features
 
-    print 'Theta', regLogisticRegression(X,y)
+    theta = regLogisticRegression(X,y)
+    
+    print 'Theta:', theta
     
     #prediction = sigmoid(2)
     #print prediction
