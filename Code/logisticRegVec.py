@@ -53,7 +53,7 @@ def regLogisticRegression(X, y):
     
     theta = [0] * n_features
     alpha = 1
-    n_iters = 100
+    n_iters = 1000
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
@@ -76,19 +76,14 @@ def main():
     X = np.array(df_X) 
     print X
     
-    X = np.array(X)
-    print X
-    
     df_y = pd.read_csv('Labels.csv', header = None)
     #print df_y
     
     y = np.array(df_y).T[0]
     print y
     
-    X.shape
-    
-    #theta = regLogisticRegression(X,y)    
-    #print 'Theta:', theta
+    theta = regLogisticRegression(X,y)    
+    print 'Theta:', theta
 
 
 # Standard boilerplate to call the main() function to begin
