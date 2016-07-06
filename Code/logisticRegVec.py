@@ -4,6 +4,14 @@
 import numpy as np
 import pandas as pd
 
+# Function to account for bias term
+def addBias(X):
+    n_instances = X.shape[0]   
+    bias = np.ones(n_instances).T
+    
+    return np.insert(X, 0, bias, axis=1)
+    
+
 # Definition of the sigmoid function
 def sigmoid(z):
     prediction = np.divide(1.0, (1.0 + np.exp(np.multiply(-1.0,z))))
@@ -53,7 +61,7 @@ def regLogisticRegression(X, y):
     
     theta = [0] * n_features
     alpha = 1
-    n_iters = 1000
+    n_iters = 10000
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
@@ -82,8 +90,12 @@ def main():
     y = np.array(df_y).T[0]
     print y
     
-    theta = regLogisticRegression(X,y)    
-    print 'Theta:', theta
+    X = addBias(X)
+    
+    print X
+    
+    #theta = regLogisticRegression(X,y)    
+    #print 'Theta:', theta
 
 
 # Standard boilerplate to call the main() function to begin
