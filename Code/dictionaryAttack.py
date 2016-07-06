@@ -27,6 +27,9 @@ def dictionaryAttack(X, y, frac_knowl, frac_mal_instances):
     X_train = np.concatenate((X, mal_data), 0)
     y_train = np.append(y, mal_y)
     
+    print X_train
+    print y_train
+    
     #reg.regLogisticRegression(X, y)
     
 
