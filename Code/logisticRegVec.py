@@ -3,6 +3,7 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Function to account for bias term
 def addBias(X):
@@ -39,7 +40,7 @@ def computeCost(X, theta, trueValues, n_instances):
     
     cost = -(1.0/n_instances)*cost_sum
       
-    print 'Cost:', cost
+    #print 'Cost:', cost
     
     return cost
     
@@ -60,21 +61,34 @@ def regLogisticRegression(X, y):
     n_instances, n_features = X.shape
     
     theta = [0] * n_features
+    cost = []
     alpha = 1
-    n_iters = 10000
+    n_iters = 1000
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
+        cost.append(computeCost(X, theta, y, n_instances))
         
         if x%100 == 0:
             print 'Iteration:', x
             #print 'Theta:', theta
-            computeCost(X, theta, y, n_instances)
+            print 'Cost:', cost[x]
     
+    plotCost(n_iters, cost)
+            
     return theta
     
-    
 
+# Plot (iteration, cost at iteration)
+def plotCost(n_iters, cost):
+    x_axis = np.linspace(1,n_iters, num=n_iters, endpoint=True)
+    
+    plt.plot(x_axis,cost)
+    plt.xlabel('Iterations')
+    plt.ylabel('Cost')
+    plt.show()
+    
+    
 # Main function to write tests and run the regression
 def main():
 
@@ -94,8 +108,8 @@ def main():
     
     print X
     
-    #theta = regLogisticRegression(X,y)    
-    #print 'Theta:', theta
+    theta = regLogisticRegression(X,y)    
+    print 'Theta:', theta
 
 
 # Standard boilerplate to call the main() function to begin
