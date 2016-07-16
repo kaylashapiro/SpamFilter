@@ -1,21 +1,57 @@
-# This is a program to create "bootstrap" replicate sets from a single dataset.
-# This idea equates to sampling with replacement.
+# coding: utf-8
+
+'''
+Implementation to create "bootstrap" replicates of a given training set.
+
+A "bootstrap" replicate is a set built by random sampling with replacement 
+from the original training set. 
+'''
 
 import numpy as np 
 import random
 import pandas as pd
 import sys
     
-# Generate a single bootstrap replicate set by sampling with replacement.    
 def generateReplicate(X, y, new_instances):
+    '''
+    Returns a single bootstrap replicate set and corresponding labels.
+    
+    Inputs:
+    - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
+         with no_instances: the number of training examples
+         and  no_features: the number of features for each example
+    - y: 1 * no_instances Numpy vector of binary values (0 and 1)
+    -new_instances: number of examples in the generated bootstrap replicate set
+    
+    Outputs:
+    - X_train: new_instances * no_features Numpy matrix; bootstrap replicate
+    - y_train: 1 * new_instances Numpy vector of corresponding labels
+    '''
+    
     indices = np.random.choice(X.shape[0], new_instances, replace=True)
+    
+    X_train = np.array(X[indices])
+    y_train = y[indices]
      
-    return (np.array(X[indices]), y[indices])
+    return (X_train, y_train)
     
 
-# Function to generate a certain number of replicate sets.
-# Saves as csv for specified path
 def generateBootstraps(X, y, new_instances, n_replicates):
+    '''
+    Generates a certain number of replicate sets and saves them to .csv file
+    for a specified path.
+    
+    Inputs:
+    - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
+         with no_instances: the number of training examples
+         and  no_features: the number of features for each example
+    - y: 1 * no_instances Numpy vector of binary values (0 and 1)
+    -new_instances: number of examples in the generated bootstrap replicate set
+    n_replicates: number of replicate sets to generate
+    
+    Output:
+    NONE
+    '''
     folder = './Bootstraps/'
 
     for i in range(0, n_replicates):
