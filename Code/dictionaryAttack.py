@@ -1,40 +1,81 @@
+# coding: utf-8
+
+'''
+Implementation of a simple dictionary attack. 
+
+Injects copies of same malicious data point.
+
+Assumes no bias has been added yet.
+'''
+
 import numpy as np
 import random
 import pandas as pd
 import logisticRegVec as reg
 
-# Function to generate dictionary attack data
-# INPUT: number of poison data instances, number of features for each data point, number of features the attacker knows
 def generateAttackData(no_mal_instances, no_features, no_mal_features):
+    '''
+    Returns crafted attack instances.
+    
+    Inputs:
+    - no_mal_instances: number of poison data examples
+    - no_features: the number of features for each example
+    - no_mal_features: the number of features the attacker knows about
+    
+    Output: 
+    - mal_data: set of poison examples
+    
+    TODO: Think about implementing more sophisticated attacker knowledge rather than random
+    TODO: Think about implementing attack with different data points
+    '''
+    
     rand_features = np.array([0] * (no_features - no_mal_features) + [1] * no_mal_features)
     np.random.shuffle(rand_features)
     
     mal_data = np.array([rand_features,] * no_mal_instances)
-    mal_y = np.array([1] * no_mal_instances) # Contamination assumption
-      
-    return (mal_data, mal_y)
     
-# Function to perform dictionary attack    
-# INPUT: Data, labels, features attacker knows (as a fraction), poisoned data (as a fraction).
-def dictionaryAttack(X, y, frac_knowl, frac_mal_instances):
+    return mal_data
+    
+
+def poisonData(X, y, frac_knowl, frac_mal_instances):
+    '''
+    Returns the input data with *added* data that is crafted specifically to cause
+    a poisoning dictionary attack, where all features (within attacker knowledge)
+    are set to 1. 
+    
+    Inputs:
+    - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
+        with no_instances: the number of training examples
+        and  no_features: the number of features for each example
+    - y: 1 * no_instances Numpy vector of binary values (0 and 1)
+    - frac_knowl: float between 0 and 1
+                  percentage of knowledge the attacker has of the feature set
+    - frac_mal_instances: float between 0 and 1
+                          percentage of the dataset under the attacker's control
+    
+    Outputs:
+    - X: poisoned features
+    - y: poisoned labels    
+    '''
+    
     no_instances, no_features = X.shape
     
     no_mal_features = int(round(frac_knowl * no_features))
-    no_mal_instances = int(round(frac_mal_instances * (no_instances / (1 - frac_mal_instances))))
+    no_mal_instances = int(round(frac_mal_instances * no_instances))
         
-    mal_data, mal_y = generateAttackData(no_mal_instances, no_features, no_mal_features)
+    mal_data = generateAttackData(no_mal_instances, no_features, no_mal_features)
+    mal_y = np.ones(no_mal_instances, dtype=np.int) # Contamination assumption
     
-    X_train = np.concatenate((X, mal_data), 0)
-    y_train = np.append(y, mal_y)
+    indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
     
-    print X_train
-    print y_train
+    X[indices] = mal_data
+    y[indices] = 1
     
-    #reg.regLogisticRegression(X, y)
+    return (X, y)
     
 
 
-# Main function to run the dictionary attack
+# Main function to test the dictionary attack
 def main():
     df_X = pd.read_csv('test.csv', header = None)
     X = np.array(df_X)
@@ -47,7 +88,7 @@ def main():
     frac_knowl = .5
     frac_mal_instances = 1.0/3
     
-    dictionaryAttack(X, y, frac_knowl, frac_mal_instances)
+    print poisonData(X, y, frac_knowl, frac_mal_instances)
     
     
 
