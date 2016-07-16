@@ -2,6 +2,7 @@
 # Attacker knowledge references the fraction of features an attacker knows
 
 import numpy as np 
+import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import logisticRegVec as lr
@@ -10,17 +11,24 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegression
 
+def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, percent_features=1):
+    no_features = X_train.shape[1]
+    no_subsamples = int(round(percent_features * no_features))
+    
+    select_features = np.sort(np.random.choice(no_features, no_subsamples, replace=False))
+    
+    X_train = X_train[:,select_features]
+    X_test = X_test[:,select_features]
+    
+    errors = bagPredictors(X_train, y_train, X_test, y_test, no_predictors)
+    
+    return errors
+    
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors):
 
     no_instances = X_train.shape[0]
     
-    base_classifier = LogisticRegression(max_iter=1000)
-    base_classifier.fit(X_train, y_train)
-    predictions = base_classifier.predict(X_test)
-    #print 'Base Error:', computeError(predictions, y_test)
-    
-    new_instances = 10 # Should be same number of instances as X
     errors = []
 
     replicate, labels = swr.generateReplicate(X_train, y_train, no_instances)
@@ -79,17 +87,17 @@ def computeError(predictions, y_test):
 
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_X = pd.read_csv('Features.csv', header = None)
+    df_X = pd.read_csv('test.csv', header = None)
     X = np.array(df_X)
     print X
     
-    df_y = pd.read_csv('Labels.csv', header = None)
+    df_y = pd.read_csv('test_y.csv', header = None)
     y = np.array(df_y).T[0]
     print y
     
     no_predictors = 3
     
-    print bagPredictors(X, y, X, y, no_predictors)
+    print bagFeatureSubsampling(X, y, X, y, no_predictors, percent_features=1)
     
     
 # This is the standard boilerplate that calls the main() function.
