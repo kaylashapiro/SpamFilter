@@ -11,7 +11,6 @@ Assumes no bias has been added yet.
 import numpy as np
 import random
 import pandas as pd
-import logisticRegVec as reg
 
 def generateAttackData(no_mal_instances, no_features, no_mal_features):
     '''
@@ -23,7 +22,7 @@ def generateAttackData(no_mal_instances, no_features, no_mal_features):
     - no_mal_features: the number of features the attacker knows about
     
     Output: 
-    - mal_data: set of poison examples
+    - mal_data: no_mal_instances * no_features Numpy matrix of poison examples
     
     TODO: Think about implementing more sophisticated attacker knowledge rather than random
     TODO: Think about implementing attack with different data points
