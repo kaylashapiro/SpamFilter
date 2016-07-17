@@ -12,7 +12,7 @@ import random
 import pandas as pd
 import sys
     
-def generateReplicate(X, y, new_instances):
+def generateReplicate(X, y, percent_instances=1):
     '''
     Returns a single bootstrap replicate set and corresponding labels.
     
@@ -21,12 +21,16 @@ def generateReplicate(X, y, new_instances):
          with no_instances: the number of training examples
          and  no_features: the number of features for each example
     - y: 1 * no_instances Numpy vector of binary values (0 and 1)
-    -new_instances: number of examples in the generated bootstrap replicate set
+    - percent_instances: float between 0 and 1; percentage of the number of instances 
+                         in the training set to include in the generated bootstrap
+                         replicate set
     
     Outputs:
     - X_train: new_instances * no_features Numpy matrix; bootstrap replicate
     - y_train: 1 * new_instances Numpy vector of corresponding labels
     '''
+    
+    new_instances = int(round(percent_instances*X.shape[0]))
     
     indices = np.random.choice(X.shape[0], new_instances, replace=True)
     
@@ -36,7 +40,7 @@ def generateReplicate(X, y, new_instances):
     return (X_train, y_train)
     
 
-def generateBootstraps(X, y, new_instances, n_replicates):
+def generateBootstraps(X, y, n_replicates, percent_instances=1):
     '''
     Generates a certain number of replicate sets and saves them to .csv file
     for a specified path.
@@ -46,8 +50,10 @@ def generateBootstraps(X, y, new_instances, n_replicates):
          with no_instances: the number of training examples
          and  no_features: the number of features for each example
     - y: 1 * no_instances Numpy vector of binary values (0 and 1)
-    -new_instances: number of examples in the generated bootstrap replicate set
-    n_replicates: number of replicate sets to generate
+    - n_replicates: number of replicate sets to generate
+    - percent_instances: float between 0 and 1; percentage of the number of instances 
+                         in the training set to include in the generated bootstrap
+                         replicate set; default set to 1
     
     Output:
     NONE
@@ -55,7 +61,7 @@ def generateBootstraps(X, y, new_instances, n_replicates):
     folder = './Bootstraps/'
 
     for i in range(0, n_replicates):
-        replicate, labels = generateReplicate(X, y, new_instances)
+        replicate, labels = generateReplicate(X, y, percent_instances)
         
         filename = 'replicate' + str(i+1) + '.csv'
         out_name = folder + filename
@@ -83,7 +89,7 @@ def main():
     y = np.array(df_y)
     print y
   
-    [X, y] = generateReplicate(X, y, X.shape[0])
+    [X, y] = generateReplicate(X, y)
     print X
     print y
 
