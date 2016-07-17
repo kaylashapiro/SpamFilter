@@ -46,8 +46,8 @@ def generateAttackData(ham_email, features_present, no_mal_instances, no_feature
     Output: 
     - mal_data: no_mal_instances * no_features Numpy matrix of poison examples
     
-    TODO: Think about implementing more sophisticated attacker knowledge rather than random
-    TODO: Think about implementing attack with different data points
+    EXTENSION: Implement more sophisticated attacker knowledge rather than random
+    EXTENSION: Implement attack with different (varied) data points
     '''
     
     rand_features = np.array([0] * (no_features - no_mal_features) + [1] * no_mal_features)

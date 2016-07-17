@@ -1,5 +1,13 @@
-# This is an implementation of a bagging algorithm
-# Attacker knowledge references the fraction of features an attacker knows
+# coding: utf-8
+
+'''
+Implementation to bag logistic regression classifiers and return their error for
+a given test set and bagged predictors.
+
+Bagging uses bootstrap replicate sets to generate different classifiers from the
+same training set. These classifiers each get a vote as to which class to assign
+to a new test instance.
+'''
 
 import numpy as np 
 import random
@@ -12,6 +20,29 @@ from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegression
 
 def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, percent_features=1):
+    '''
+    Returns array of error rates for each time a predictor is added to the
+    bagged classifier. The last error rate in the bag represents the error
+    rate resulting from the fully bagged classifier.
+    
+    Inputs:
+    - X_train: N * D Numpy matrix of binary feature values (0 and 1); training set
+               with N: the number of training examples
+               and  D: the number of features for each example
+    - y_train: 1 * N Numpy vector of binary values (0 and 1); training set
+    - X_test: M * D Numpy matrix of binary feature values (0 and 1); test set
+              with M: the number of test examples
+    - y_test: 1 * M Numpy vector of binary values (0 and 1); test set
+    - no_predictors: Number of predictors to bag
+    - percent_features: Float between 0 and 1 representing the percentage of features to use in
+                        bagging implemented with feature subsampling (sampling features without
+                        replacement)
+    
+    Output:
+    - errors: Array listing the error at each bagging iteration (i.e. after
+              each predictor is added to the bag)
+    '''
+    
     no_features = X_train.shape[1]
     no_subsamples = int(round(percent_features * no_features))
     
@@ -26,17 +57,30 @@ def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, perce
     
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors):
-
-    no_instances = X_train.shape[0]
+    '''
+    Returns array of error rates for each time a predictor is added to the
+    bagged classifier. The last error rate in the bag represents the error
+    rate resulting from the fully bagged classifier.
     
+    Inputs:
+    - X_train: N * D Numpy matrix of binary feature values (0 and 1); training set
+               with N: the number of training examples
+               and  D: the number of features for each example
+    - y_train: 1 * N Numpy vector of binary values (0 and 1); training set
+    - X_test: M * D Numpy matrix of binary feature values (0 and 1); test set
+              with M: the number of test examples
+    - y_test: 1 * M Numpy vector of binary values (0 and 1); test set
+    - no_predictors: Number of predictors to bag
+         
+    Output:
+    - errors: Array listing the error at each bagging iteration (i.e. after
+              each predictor is added to the bag)
+    '''
+        
     errors = []
 
-    replicate, labels = swr.generateReplicate(X_train, y_train, no_instances)
-    #print replicate
-    #print 'Labels', labels
-    
-    #thetas = [lr.regLogisticRegression(replicate, labels)]
-    
+    replicate, labels = swr.generateReplicate(X_train, y_train)
+        
     classifier = LogisticRegression(max_iter=1000)    
     
     classifier.fit(replicate, labels)    
@@ -45,45 +89,59 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors):
     
     votes = predictions
     
-    #print 'Single Classifier Predictions', predictions
-    
     errors.append(computeError(predictions, y_test))
     
     for ith_predictor in range(1, no_predictors):
-        replicate, labels = swr.generateReplicate(X_train, y_train, no_instances)
-        #print replicate
-        #print 'Labels', labels
+        replicate, labels = swr.generateReplicate(X_train, y_train)
         
         classifier.fit(replicate, labels)
-        
-        predictions = classifier.predict(X_test)
-        #print 'Single Classifier Predictions', predictions
-        
-        #print computeError(predictions, y_test)
-        
-        votes += predictions
-        #print 'Votes', votes
+
+        votes += classifier.predict(X_test)
         
         predictions = computeClass(votes, ith_predictor + 1)
-        #print 'Actual Predictions', predictions
         
         errors.append(computeError(predictions, y_test))
-        #print errors
                
     return errors
 
+    
 def computeClass(votes, ith_predictor):
-
+    '''
+    Returns the predicted classes for a given test set and bagged classifier.
+    
+    Inputs:
+    - votes: 1 * N array of cumulative classifications for a given test example
+             with N: the number of test examples
+    - ith_predictor: Number of predictors in the current bagged predictor
+    
+    Output:
+    - votes: 1 * N array of the predicted class for a given test set  
+    '''
+    
     votes = votes/float(ith_predictor)
-    #print 'computeClass', votes
     
     votes[votes<=.5] = 0
     votes[votes>.5] = 1
     
     return votes
     
+    
 def computeError(predictions, y_test):
-    return np.mean(predictions != y_test)
+    '''
+    Returns the error rate for a given test set and classifier predictions.
+    
+    Inputs:    
+    - predictions: 1 * N Numpy vector of binary values; test set predictions
+                   with N: the number of test examples
+    - y_test: 1 * N Numpy vector of binary values (0 and 1); test set labels
+    
+    Output:
+    - error: Float error rate
+    '''
+    
+    error = np.mean(predictions != y_test)
+    
+    return error
 
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
