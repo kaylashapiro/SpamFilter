@@ -65,9 +65,7 @@ def poisonData(X, y, frac_knowl, frac_mal_instances):
     mal_data = generateAttackData(no_mal_instances, no_features, no_mal_features)
     
     indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
-    
-    print indices
-    
+        
     X[indices] = mal_data
     y[indices] = 1 # Contamination Assumption
     

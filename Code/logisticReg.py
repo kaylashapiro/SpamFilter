@@ -88,7 +88,7 @@ def gradient_update(theta, x, y, alpha):
     return new_theta
     
     
-def fitLR(X, y, alpha=.1, epochs=100, threshold=1e-5):
+def fit(X, y, alpha=.1, epochs=100, threshold=1e-5):
     '''
     Implementation of logistic regression classifier with stochastic
     gradient descent.
@@ -124,7 +124,7 @@ def fitLR(X, y, alpha=.1, epochs=100, threshold=1e-5):
         for j in range(N):
             theta = gradient_update(theta, X[j,:], y[j], alpha)   
             
-        epoch_errors[i,:] = computeError(y, predictLR(X, theta, False))
+        epoch_errors[i,:] = computeError(y, predict(X, theta, False))
         
         if (np.abs(last_epoch_error - epoch_errors[i]) < threshold):
             break
@@ -137,7 +137,7 @@ def fitLR(X, y, alpha=.1, epochs=100, threshold=1e-5):
     
     return theta
     
-def predictLR(X, theta, add_bias=True):
+def predict(X, theta, add_bias=True):
     '''
     Inputs:
     - X: N * D Numpy matrix of binary feature values (0 and 1)
@@ -161,7 +161,7 @@ def predictLR(X, theta, add_bias=True):
     
     return predictions
 
-def predictLRsoft(X, theta, add_bias=True):
+def predictSoft(X, theta, add_bias=True):
     '''
     Inputs:
     - X: N * D Numpy matrix of binary feature values (0 and 1)

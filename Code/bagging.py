@@ -13,24 +13,24 @@ import numpy as np
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-import logisticRegVec as lr
+import logisticReg as lr
 import sampleWithReplacement as swr
 from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegression
 
-def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, percent_features=1):
+def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, percent_features=1, percent_instances=1):
     '''
     Returns array of error rates for each time a predictor is added to the
     bagged classifier. The last error rate in the bag represents the error
     rate resulting from the fully bagged classifier.
     
     Inputs:
-    - X_train: N * D Numpy matrix of binary feature values (0 and 1); training set
+    - X_train: N * D Numpy matrix of binary feature values (0 and 1)
                with N: the number of training examples
                and  D: the number of features for each example
     - y_train: 1 * N Numpy vector of binary values (0 and 1); training set
-    - X_test: M * D Numpy matrix of binary feature values (0 and 1); test set
+    - X_test: M * D Numpy matrix of binary feature values (0 and 1)
               with M: the number of test examples
     - y_test: 1 * M Numpy vector of binary values (0 and 1); test set
     - no_predictors: Number of predictors to bag
@@ -56,7 +56,7 @@ def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, perce
     return errors
     
 
-def bagPredictors(X_train, y_train, X_test, y_test, no_predictors):
+def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, percent_instances=1):
     '''
     Returns array of error rates for each time a predictor is added to the
     bagged classifier. The last error rate in the bag represents the error
@@ -79,28 +79,26 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors):
         
     errors = []
 
-    replicate, labels = swr.generateReplicate(X_train, y_train)
+    replicate, labels = swr.generateReplicate(X_train, y_train, percent_instances)
         
-    classifier = LogisticRegression(max_iter=1000)    
-    
-    classifier.fit(replicate, labels)    
-    
-    predictions = classifier.predict(X_test)
-    
+    classifier_weights = lr.fit(replicate, labels)     
+         
+    predictions = lr.predict(X_test, classifier_weights)
+   
     votes = predictions
     
-    errors.append(computeError(predictions, y_test))
+    errors.append(lr.computeError(predictions, y_test))
     
     for ith_predictor in range(1, no_predictors):
         replicate, labels = swr.generateReplicate(X_train, y_train)
         
-        classifier.fit(replicate, labels)
+        classifier_weights = lr.fit(replicate, labels)
 
-        votes += classifier.predict(X_test)
+        votes += lr.predict(X_test, classifier_weights)
         
         predictions = computeClass(votes, ith_predictor + 1)
         
-        errors.append(computeError(predictions, y_test))
+        errors.append(lr.computeError(predictions, y_test))
                
     return errors
 
@@ -125,23 +123,6 @@ def computeClass(votes, ith_predictor):
     
     return votes
     
-    
-def computeError(predictions, y_test):
-    '''
-    Returns the error rate for a given test set and classifier predictions.
-    
-    Inputs:    
-    - predictions: 1 * N Numpy vector of binary values; test set predictions
-                   with N: the number of test examples
-    - y_test: 1 * N Numpy vector of binary values (0 and 1); test set labels
-    
-    Output:
-    - error: Float error rate
-    '''
-    
-    error = np.mean(predictions != y_test)
-    
-    return error
 
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
@@ -150,7 +131,7 @@ def main():
     print X
     
     df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y).T[0]
+    y = np.array(df_y)
     print y
     
     no_predictors = 3
