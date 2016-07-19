@@ -29,18 +29,18 @@ def bagFeatureSubsampling(X_train, y_train, X_test, y_test, no_predictors, perce
     - X_train: N * D Numpy matrix of binary feature values (0 and 1)
                with N: the number of training examples
                and  D: the number of features for each example
-    - y_train: 1 * N Numpy vector of binary values (0 and 1); training set
+    - y_train: N * 1 Numpy vector of binary values (0 and 1); training set
     - X_test: M * D Numpy matrix of binary feature values (0 and 1)
               with M: the number of test examples
-    - y_test: 1 * M Numpy vector of binary values (0 and 1); test set
+    - y_test: M * 1 Numpy vector of binary values (0 and 1); test set
     - no_predictors: Number of predictors to bag
     - percent_features: Float between 0 and 1 representing the percentage of features to use in
                         bagging implemented with feature subsampling (sampling features without
                         replacement)
     
     Output:
-    - errors: Array listing the error at each bagging iteration (i.e. after
-              each predictor is added to the bag)
+    - errors: 1 * no_predictors array listing the error at each bagging iteration 
+              (i.e. after each predictor is added to the bag)
     '''
     
     no_features = X_train.shape[1]
@@ -66,15 +66,15 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, percent_insta
     - X_train: N * D Numpy matrix of binary feature values (0 and 1); training set
                with N: the number of training examples
                and  D: the number of features for each example
-    - y_train: 1 * N Numpy vector of binary values (0 and 1); training set
+    - y_train: N * 1 Numpy vector of binary values (0 and 1); training set
     - X_test: M * D Numpy matrix of binary feature values (0 and 1); test set
               with M: the number of test examples
-    - y_test: 1 * M Numpy vector of binary values (0 and 1); test set
+    - y_test: M * 1 Numpy vector of binary values (0 and 1); test set
     - no_predictors: Number of predictors to bag
          
     Output:
-    - errors: Array listing the error at each bagging iteration (i.e. after
-              each predictor is added to the bag)
+    - errors: 1 * no_predictors array listing the error at each bagging iteration 
+              (i.e. after each predictor is added to the bag)
     '''
         
     errors = []
@@ -108,12 +108,12 @@ def computeClass(votes, ith_predictor):
     Returns the predicted classes for a given test set and bagged classifier.
     
     Inputs:
-    - votes: 1 * N array of cumulative classifications for a given test example
+    - votes: N * 1 array of cumulative classifications for a given test example
              with N: the number of test examples
     - ith_predictor: Number of predictors in the current bagged predictor
     
     Output:
-    - votes: 1 * N array of the predicted class for a given test set  
+    - votes: N * 1 array of the predicted class for a given test set  
     '''
     
     votes = votes/float(ith_predictor)
