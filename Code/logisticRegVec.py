@@ -1,9 +1,9 @@
-
 # coding: utf-8
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.cross_validation import train_test_split
 
 # Function to account for bias term
 def addBias(X):
@@ -50,8 +50,8 @@ def gradientDescent(X, y, theta, n_instances, n_features, alpha):
     predictions = hypothesis(X, theta)
 
     grad = np.dot(X.transpose(), np.divide((y - predictions),n_instances))
-    
-    new_theta = theta + np.multiply(grad, alpha)
+    mgrad = np.mean(grad.transpose(),0)
+    new_theta = theta + np.reshape(np.multiply(mgrad, alpha),(n_features,1))
      
     return new_theta
 
@@ -59,11 +59,10 @@ def gradientDescent(X, y, theta, n_instances, n_features, alpha):
 # X holds training instances, y holds their class values
 def regLogisticRegression(X, y):
     n_instances, n_features = X.shape
-    
-    theta = [0] * n_features
+    theta = np.zeros((n_features,1))
     cost = []
     alpha = 1
-    n_iters = 1000
+    n_iters = 200
     
     for x in range(0,n_iters):
         theta = gradientDescent(X,y,theta,n_instances,n_features,alpha)
@@ -74,9 +73,20 @@ def regLogisticRegression(X, y):
             #print 'Theta:', theta
             print 'Cost:', cost[x]
     
-    plotCost(n_iters, cost)
+    #plotCost(n_iters, cost)
             
     return theta
+    
+
+# Compute the average error of a test set
+def computeError(X_test, y_test, thetas):
+    no_test = X_test.shape[0]
+    pred = hypothesis(X_test,thetas)
+    indicator = np.zeros((no_test, 1))
+    indicator[pred>0.5] = 1
+    error = np.mean(indicator != y_test)
+    
+    return error
     
 
 # Plot (iteration, cost at iteration)
@@ -93,23 +103,20 @@ def plotCost(n_iters, cost):
 def main():
 
     df_X = pd.read_csv('Features.csv', header = None)
-    #print df_X
     
     X = np.array(df_X) 
-    print X
     
     df_y = pd.read_csv('Labels.csv', header = None)
-    #print df_y
     
     y = np.array(df_y).T[0]
-    print y
     
     X = addBias(X)
+        
+    thetas = regLogisticRegression(X,y)    
+    print 'Theta values:', thetas
     
-    print X
-    
-    theta = regLogisticRegression(X,y)    
-    print 'Theta:', theta
+    error = computeError(X, y, thetas)
+    print 'Error', error
 
 
 # Standard boilerplate to call the main() function to begin
