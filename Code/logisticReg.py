@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import confusion_matrix
 #import matplotlib.pyplot as plt
 
 def addBias(X): 
@@ -201,6 +202,33 @@ def computeError(y, predictions):
     error = np.mean(y != predictions)
     
     return error
+
+def computeMetrics(y, predictions):
+    '''
+    Returns the number of true positives, false positives, false
+    negatives, and true negatives for a given training set and its
+    predicted classes.
+    
+    Input:
+    - y: N * 1 Numpy vector of binary feature values (0 and 1);
+         class labels
+    - predictions: N * 1 Numpy vector of binary values (0 and 1);
+                   predicted classes
+    
+    Output:
+    - TP: number of true positives
+    - FP: number of false positives
+    - FN: number of false negatives
+    - TN: number of true negatives
+    '''
+    cm  = confusion_matrix(y, predictions)
+
+    TP = cm[0][0]
+    FP = cm[0][1]
+    FN = cm[1][0]
+    TN = cm[1][1]
+    
+    return (TP, FP, FN, TN)
     
     
 def main():
@@ -213,15 +241,17 @@ def main():
     df_y = pd.read_csv('Labels.csv', header = None)
     y = np.array(df_y)
     print y   
-    w = fitLR(x,y,0.1)
-    pred = predictLR(x,w)
+    w = fit(x,y,0.1)
+    pred = predict(x,w)
     error = computeError(y,pred)
-    print(error)
+    [TP, FP, FN, TN] = computeMetrics(y, pred)
     
-    y_test = np.array([[1],[1],[1]])
-    t_test = np.array([[.9],[.8],[.9]])
-    
-    print cost(y_test,t_test)
+    print 'Error:', error
+    print 'TP:', TP
+    print 'FP:', FP
+    print 'FN:', FN
+    print 'TN:', TN
+
     
 
 if __name__ == '__main__':
