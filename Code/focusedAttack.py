@@ -95,7 +95,6 @@ def poisonData(X, y, frac_knowl, frac_mal_instances):
     no_mal_instances = int(round(frac_mal_instances * no_instances))
         
     mal_data = generateAttackData(ham_email, features_present, no_mal_instances, no_features, no_mal_features)
-    mal_y = np.ones(no_mal_instances, dtype=np.int) # Contamination assumption
     
     indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
     
@@ -112,7 +111,7 @@ def main():
     print X
     
     df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y).T[0]
+    y = np.array(df_y)
     print y
     
     frac_knowl = .5

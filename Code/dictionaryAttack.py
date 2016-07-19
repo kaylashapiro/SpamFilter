@@ -46,7 +46,7 @@ def poisonData(X, y, frac_knowl, frac_mal_instances):
     - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
         with no_instances: the number of training examples
         and  no_features: the number of features for each example
-    - y: 1 * no_instances Numpy vector of binary values (0 and 1)
+    - y: no_instances * 1 Numpy vector of binary values (0 and 1)
     - frac_knowl: float between 0 and 1
                   percentage of knowledge the attacker has of the feature set
     - frac_mal_instances: float between 0 and 1
@@ -63,12 +63,13 @@ def poisonData(X, y, frac_knowl, frac_mal_instances):
     no_mal_instances = int(round(frac_mal_instances * no_instances))
         
     mal_data = generateAttackData(no_mal_instances, no_features, no_mal_features)
-    mal_y = np.ones(no_mal_instances, dtype=np.int) # Contamination assumption
     
     indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
     
+    print indices
+    
     X[indices] = mal_data
-    y[indices] = 1
+    y[indices] = 1 # Contamination Assumption
     
     return (X, y)
     
@@ -81,7 +82,7 @@ def main():
     print X
     
     df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y).T[0]
+    y = np.array(df_y)
     print y
     
     frac_knowl = .5
