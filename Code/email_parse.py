@@ -56,8 +56,8 @@ for filepath in glob.glob('../Datasets/enron/spam/*'):
         corpus.append(body)
         y.append(1)
 
-vectorizer = CountVectorizer(min_df=1, stop_words='english')
-#vectorizer = CountVectorizer(min_df=1, stop_words='english', max_features=1000)
+#vectorizer = CountVectorizer(min_df=1, stop_words='english')
+vectorizer = CountVectorizer(min_df=1, stop_words='english', max_features=1000)
 X = vectorizer.fit_transform(corpus)
 
 my_y = pd.DataFrame(y, dtype = np.uint8)
