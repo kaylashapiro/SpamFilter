@@ -2,8 +2,9 @@
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix
-#import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, roc_curve, auc
+from metrics import computeError, computeMetrics, computeROC, computeRates
+import matplotlib.pyplot as plt
 
 def addBias(X): 
     '''
@@ -24,7 +25,6 @@ def addBias(X):
     
     return X_bias
 
-
 def sigmoid(z):
     '''
     Definition of the sigmoid function. Returns a float between
@@ -40,7 +40,6 @@ def sigmoid(z):
     prediction = np.divide(1, 1 + np.exp(-z))
 
     return prediction
-    
 
 def cost(trueValues, predictions):
     '''
@@ -63,8 +62,7 @@ def cost(trueValues, predictions):
     cost = np.mean(costs)
     
     return cost
-
-
+    
 def gradient_update(theta, x, y, alpha):
     '''
     Returns the gradient update for a single training example.
@@ -86,10 +84,9 @@ def gradient_update(theta, x, y, alpha):
     grad = np.multiply((s - y), x)
     new_theta = theta - np.reshape(np.dot(alpha, grad),(theta.shape[0],1))
     
-    return new_theta
-    
-    
-def fit(X, y, alpha=.1, epochs=100, threshold=1e-5):
+    return new_theta  
+   
+def fit(X, y, alpha=.1, epochs=100, threshold=1e-5, add_bias = True):
     '''
     Implementation of logistic regression classifier with stochastic
     gradient descent.
@@ -109,7 +106,8 @@ def fit(X, y, alpha=.1, epochs=100, threshold=1e-5):
     - theta: D * 1 Numpy vector of float weights of trained classifier
     '''
     
-    X = addBias(X)
+    if (add_bias):    
+        X = addBias(X)
     
     N, D = X.shape
     theta = np.zeros((D,1))  
@@ -182,53 +180,7 @@ def predictSoft(X, theta, add_bias=True):
         
     probs = sigmoid(np.dot(X, theta))
     
-    return probs
-    
-def computeError(y, predictions):
-    '''
-    Returns the average error for a given training set and its
-    predicted classes.
-    
-    Input:
-    - y: N * 1 Numpy vector of binary feature values (0 and 1);
-         class labels
-    - predictions: N * 1 Numpy vector of binary values (0 and 1);
-                   predicted classes
-    
-    Output:
-    - error: float average error
-    '''
-    
-    error = np.mean(y != predictions)
-    
-    return error
-
-def computeMetrics(y, predictions):
-    '''
-    Returns the number of true positives, false positives, false
-    negatives, and true negatives for a given training set and its
-    predicted classes.
-    
-    Input:
-    - y: N * 1 Numpy vector of binary feature values (0 and 1);
-         class labels
-    - predictions: N * 1 Numpy vector of binary values (0 and 1);
-                   predicted classes
-    
-    Output:
-    - TP: number of true positives
-    - FP: number of false positives
-    - FN: number of false negatives
-    - TN: number of true negatives
-    '''
-    cm  = confusion_matrix(y, predictions)
-
-    TP = cm[0][0]
-    FP = cm[0][1]
-    FN = cm[1][0]
-    TN = cm[1][1]
-    
-    return (TP, FP, FN, TN)
+    return probs 
     
     
 def main():
@@ -245,13 +197,31 @@ def main():
     pred = predict(x,w)
     error = computeError(y,pred)
     [TP, FP, FN, TN] = computeMetrics(y, pred)
+    [FPR, TPR, thresholds] = computeROC(y, pred)
+    roc_auc = auc(FPR,TPR)
+    #[TPR,FPR,FNR,TNR] = computeRates(TP, FP, FN, TN)
+    
     
     print 'Error:', error
     print 'TP:', TP
     print 'FP:', FP
     print 'FN:', FN
     print 'TN:', TN
-
+    print 'FPR:', FPR
+    print 'TPR', TPR
+    #print 'FNR:', FNR
+    #print 'TNR:', TNR
+    print thresholds
+    
+    plt.title('Receiver Operating Characteristic')
+    plt.plot(FPR, TPR, 'b', label = 'AUC = %0.2f' % roc_auc)
+    plt.legend(loc = 'lower right')
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0, 1])
+    plt.ylim([0, 1])
+    plt.ylabel('True Positive Rate')
+    plt.xlabel('False Positive Rate')
+    plt.show()
     
 
 if __name__ == '__main__':
