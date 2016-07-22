@@ -4,6 +4,9 @@ import numpy as np
 
 def labelSwitching(y, perc_label_switching):
     '''
+    Returns training labels with some percentage labels switched from 1 to 0
+    (and vice versa).
+    
     Inputs:
     - y: N * 1 Numpy vector of binary values (0 and 1)
          with N: the number of label instances
