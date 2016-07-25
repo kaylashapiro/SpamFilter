@@ -46,6 +46,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
                                 features without replacement)
     - perc_label_switching: Float between 0 and 1 representing the percentage of labels to switch
                             (flip) in the training set
+    - classifier: string classifier name; Options: 1) 'logisticReg' 2) 'adaline'
          
     Output:
     - errors: 1 * no_predictors array listing the error at each bagging iteration 
