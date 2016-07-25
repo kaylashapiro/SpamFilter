@@ -9,11 +9,12 @@ same training set. These classifiers each get a vote as to which class to assign
 to a new test instance.
 '''
 
+import sys
+import importlib
 import numpy as np 
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
-import logisticReg as lr
 import metrics as met
 import sampleWithReplacement as swr
 import featureSubsampling as fs
@@ -21,7 +22,8 @@ import labelSwitching as ls
 from sklearn.cross_validation import train_test_split
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
-                  perc_instances=1, perc_feature_subsampling=1, perc_label_switching=0):
+                  perc_instances=1, perc_feature_subsampling=1, perc_label_switching=0,
+                  classifier = 'logisticReg'):
     '''
     Returns array of error rates for each time a predictor is added to the
     bagged classifier. The last error rate in the bag represents the error
@@ -49,7 +51,14 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     - errors: 1 * no_predictors array listing the error at each bagging iteration 
               (i.e. after each predictor is added to the bag)
     '''
-        
+    try:
+        classifier = importlib.import_module(classifier)
+    except ImportError as error:
+        print error
+        print "Failed to import classifier module in bagging.py"
+        print "Available modules: 1) 'logisticReg' 2) 'adaline'"
+        sys.exit(0)
+    
     errors = []
     TPRs = []
     FPRs = []
@@ -61,10 +70,9 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
         y_train = ls.labelSwitching(y_train, perc_label_switching)
     replicate, labels = swr.generateReplicate(X_train, y_train, perc_instances)
     
-        
-    classifier_weights = lr.fit(replicate, labels)     
+    classifier_weights = classifier.fit(replicate, labels)     
          
-    votes = lr.predict(X_test, classifier_weights)
+    votes = classifier.predict(X_test, classifier_weights)
    
     predictions = votes
     
@@ -82,9 +90,9 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     for ith_predictor in range(1, no_predictors):
         replicate, labels = swr.generateReplicate(X_train, y_train)
         
-        classifier_weights = lr.fit(replicate, labels)
+        classifier_weights = classifier.fit(replicate, labels)
 
-        votes += lr.predict(X_test, classifier_weights)
+        votes += classifier.predict(X_test, classifier_weights)
         
         predictions = computeClass(votes, ith_predictor + 1)
         
