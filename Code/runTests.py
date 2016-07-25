@@ -7,30 +7,31 @@ import matplotlib.pyplot as plt
 import metrics as met
 import bagging as bag
 
-def runPoisonTests():
+def runTests(no_iterations, no_predictors, attack = 'Dict'):
     classifier = 'logisticReg'
-    attack = 'Dict'
-    perc_poisoning = [10, 20, 30]
-    bagging_samples = [.6, .8, 1.0]
-    feature_subsampling = [.5, .7, .9]
-    label_switching = [0.0, 0.1, 0.2]
-
-def runCleanTests(no_iterations, no_predictors):
-    classifier = 'logisticReg'
-    attack = 'No'
-    perc_poisoning = 0
+    
+    perc_poisoning = 10
     bagging_samples = [.6, .8, 1.0]
     feature_subsampling = [.5, .7, .9]
     label_switching = [0.0, 0.1, 0.2]
     
-    trainBaseClassifier()
+    folder_paths = {
+        'No': '../Datasets/TrainData/',
+        'Dict': '../Datasets/DictAttackData/',
+        'Empty': '../Datasets/EmptyAttackData/',
+    }
+    
+    train_folder = folder_paths[attack]
+
+    #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack, classifier)
     
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
-                x = 1
+                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, attack, classifier)
+    
             
-def trainBaseClassifier(no_iterations, perc_poisoning, attack='Dict', classifier='logisticReg'):
+def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack='Dict', classifier='logisticReg'):
     try:
         learner = importlib.import_module(classifier)
     except ImportError as error:
@@ -38,18 +39,11 @@ def trainBaseClassifier(no_iterations, perc_poisoning, attack='Dict', classifier
         print "Failed to import learner module in runTests2.py"
         print "Available modules: 1) 'logisticReg' 2) 'adaline'"
         sys.exit(0)
-    
-    folder_paths = {
-        'No': '../Datasets/TrainData/',
-        'Dict': '../Datasets/DictAttackData/',
-        'Empty': '../Datasets/EmptyAttackData/',
-    }
         
-    train_folder = folder_paths[attack]
     test_folder = '../Datasets/TestData/'
     
     if (perc_poisoning != 0):
-        data_folder = str(perc) + '_perc_poison/'
+        data_folder = str(perc_poisoning) + '_perc_poison/'
     else:
         data_folder = ''
     
@@ -67,10 +61,10 @@ def trainBaseClassifier(no_iterations, perc_poisoning, attack='Dict', classifier
         df_train = pd.read_csv(train_folder + data_folder + y_train_file, header = None)
         y_train = np.array(df_train)
         
-        df_test = pd.read_csv(test_folder + data_folder + X_test_file, header = None)
+        df_test = pd.read_csv(test_folder + X_test_file, header = None)
         X_test = np.array(df_test)
         
-        df_test = pd.read_csv(test_folder + data_folder + y_test_file, header = None)
+        df_test = pd.read_csv(test_folder + y_test_file, header = None)
         y_test = np.array(df_test)
     
         weights = learner.fit(X_train, y_train)
@@ -89,26 +83,93 @@ def trainBaseClassifier(no_iterations, perc_poisoning, attack='Dict', classifier
     FNR = sum_FNR/no_iterations
     TNR = sum_TNR/no_iterations
     
-    saveToFile(1,1,0,perc_poisoning, error, TPR, FPR, FNR, TNR, classifier, attack)
+    saveToFile(1,1,0,perc_poisoning,error,TPR,FPR,FNR,TNR,attack,classifier)
     
     return (error, TPR, FPR, FNR, TNR)
+    # FIX TO INCLUDE NO_ITERATIONS
+def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, 
+                          perc_poisoning, train_folder, attack='Dict', classifier = 'logisticReg'):
+    test_folder = '../Datasets/TestData/'          
+
+    if (perc_poisoning != 0):
+        data_folder = str(perc_poisoning) + '_perc_poison/'
+    else:
+        data_folder = ''
     
-def trainBaggedClassifier(X_train, y_train, X_test, y_test, no_predictors, 
-                            perc_instances, perc_feature_subsampling, perc_label_switching):
-    [error, TPRs, FPRs, FNRs, TNRs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
-                                                        perc_instances, perc_feature_subsampling, perc_label_switching)
+    X_train_file = 'X_train_' + str(0) + '.csv'
+    y_train_file = 'y_train_' + str(0) + '.csv'
+    X_test_file = 'X_test_' + str(0) + '.csv'
+    y_test_file = 'y_test_' + str(0) + '.csv'
     
-    return (error, TPR, FPR, FNR, TNR)
+    df_train = pd.read_csv(train_folder + data_folder + X_train_file, header = None)
+    X_train = np.array(df_train)
+    
+    df_train = pd.read_csv(train_folder + data_folder + y_train_file, header = None)
+    y_train = np.array(df_train)
+        
+    df_test = pd.read_csv(test_folder + X_test_file, header = None)
+    X_test = np.array(df_test)
+        
+    df_test = pd.read_csv(test_folder + y_test_file, header = None)
+    y_test = np.array(df_test)
+    
+    [sum_errors, sum_TPRs, sum_FPRs, sum_FNRs, sum_TNRs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
+                                                                             perc_instances, perc_feature_subsampling, perc_label_switching)
+    sum_errors = np.array([sum_errors])
+    sum_TPRs = np.array([sum_TPRs])
+    sum_FPRs = np.array([sum_FPRs])
+    sum_FNRs = np.array([sum_FNRs])
+    sum_TNRs = np.array([sum_TNRs])
+    
+    for iter in xrange(1,no_iterations): 
+        X_train_file = 'X_train_' + str(iter) + '.csv'
+        y_train_file = 'y_train_' + str(iter) + '.csv'
+        X_test_file = 'X_test_' + str(iter) + '.csv'
+        y_test_file = 'y_test_' + str(iter) + '.csv'
+    
+        df_train = pd.read_csv(train_folder + data_folder + X_train_file, header = None)
+        X_train = np.array(df_train)
+    
+        df_train = pd.read_csv(train_folder + data_folder + y_train_file, header = None)
+        y_train = np.array(df_train)
+        
+        df_test = pd.read_csv(test_folder + X_test_file, header = None)
+        X_test = np.array(df_test)
+        
+        df_test = pd.read_csv(test_folder + y_test_file, header = None)
+        y_test = np.array(df_test)
+
+        [errors, TPRs, FPRs, FNRs, TNRs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
+                                                             perc_instances, perc_feature_subsampling, perc_label_switching)
+        sum_errors = np.concatenate((sum_errors,np.array([errors])), axis=0)                                                     
+        sum_TPRs = np.concatenate((sum_TPRs,np.array([TPRs])), axis=0)
+        sum_FPRs = np.concatenate((sum_FPRs,np.array([FPRs])), axis=0)    
+        sum_FNRs = np.concatenate((sum_FNRs,np.array([FNRs])), axis=0)
+        sum_TNRs = np.concatenate((sum_TNRs,np.array([TNRs])), axis=0)
+    
+    print sum_errors
+    
+    errors = np.mean(sum_errors, axis=0)
+    TPRs = np.mean(sum_TPRs, axis=0)
+    FPRs = np.mean(sum_FPRs, axis=0)
+    FNRs = np.mean(sum_FNRs, axis=0)
+    TNRs = np.mean(sum_TNRs, axis=0)
+    
+    print errors
+      
+    saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,attack,classifier)
+    
+    return (errors, TPRs, FPRs, FNRs, TNRs)
         
 def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, 
-                errors, TPRs, FPRs, FNRs, TNRs, classifier = 'logisticReg', attack='Dict'):
+                errors, TPRs, FPRs, FNRs, TNRs, attack='Dict', classifier = 'logisticReg'):
     test_results = concatenateResults(errors, TPRs, FPRs, FNRs, TNRs)            
                 
     results_folder = '../Results/'
     attack_folder = '/' + attack + 'Attack/'
 
     if (perc_poisoning != 0):
-        data_folder = str(perc) + '_perc_poison/'
+        data_folder = str(perc_poisoning) + '_perc_poison/'
     else:
         data_folder = ''
     
@@ -162,7 +223,7 @@ def main():
     
     #saveToFile(.1, .1, .1, 10, errors, TPRs, FPRs, FNRs, TNRs)
     
-    print trainBaseClassifier(2, 0, attack='No')
+    runTests(2, 5)
     
     
 # This is the standard boilerplate that calls the main() function.
