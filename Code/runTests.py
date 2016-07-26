@@ -7,14 +7,7 @@ import matplotlib.pyplot as plt
 import metrics as met
 import bagging as bag
 
-def runTests(no_iterations, no_predictors, attack = 'Dict'):
-    classifier = 'logisticReg'
-    
-    perc_poisoning = 10
-    bagging_samples = [.6, .8, 1.0]
-    feature_subsampling = [.5, .7, .9]
-    label_switching = [0.0, 0.1, 0.2]
-    
+def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feature_subsampling, label_switching, attack = 'Dict', classifier = 'logisticReg'):
     folder_paths = {
         'No': '../Datasets/TrainData/',
         'Dict': '../Datasets/DictAttackData/',
@@ -23,7 +16,7 @@ def runTests(no_iterations, no_predictors, attack = 'Dict'):
     
     train_folder = folder_paths[attack]
 
-    #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack, classifier)
+    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack, classifier)
     
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
@@ -194,36 +187,22 @@ def concatenateResults(errors, TPRs, FPRs, FNRs, TNRs):
 
     
 def main():
-    # THESE ARE THE SETTINGS WE WANT
-    #no_iterations = 10
-    #no_predictors = 80
-    #frac_knowl = 1
-    #bagging_samples = [.6, .8, 1.0]
-    #feature_subsampling = [.5, .7, .9]
-    #perc_poisoning = [10, 20, 30]
-    #label_switching = [0.0, 0.1, 0.2]
-    # END SETTINGS
 
     # TEST PARAMETERS
-    classifier = 'logisticRegression/' # Choose from 1) 'logisticReg', 2) 'adaline'
-    attack='Dict'
     no_iterations = 1
     no_predictors = 10
-    frac_knowl = 1
-    bagging_samples = 1
-    perc_poisoning = 30
-    label_switching = .2
+    
+    attack='Dict' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
+    classifier = 'logisticRegression/' # Choose from 1) 'logisticReg', 2) 'adaline'
+    
+    perc_poisoning = [10, 20, 30]
+    bagging_samples = [.6, .8, 1.0]
+    feature_subsampling = [.5, .7, .9]
+    label_switching = [0.0, 0.1, 0.2]
     # END TEST PARAMETERS
     
-    errors = [1,2,3]
-    TPRs = [4,5,6]
-    FPRs = [7,8,9]
-    FNRs = [3,2,1]
-    TNRs = [6,5,4]
-    
-    #saveToFile(.1, .1, .1, 10, errors, TPRs, FPRs, FNRs, TNRs)
-    
-    runTests(2, 5)
+    for perc in perc_poisoning:
+        runTests(no_iterations, no_predictors, perc, bagging_samples, feature_subsampling, label_switching, attack, classifier)
     
     
 # This is the standard boilerplate that calls the main() function.
