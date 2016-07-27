@@ -7,7 +7,27 @@ import matplotlib.pyplot as plt
 import metrics as met
 import bagging as bag
 
-def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feature_subsampling, label_switching, attack = 'Dict', classifier = 'logisticReg'):
+def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feature_subsampling, label_switching, 
+             attack = 'Dict', 
+             classifier = 'logisticReg'):
+    '''
+    Inputs:
+    - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
+                     averaged
+    - no_predictors: integer number of classifiers to bag
+    - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
+    - bagging_samples: real number fraction of the training set to put into a bootstrap replicate set; .5 = 50% of 
+                       size of the training set, 1 = 100% of size of the training set, 2 = 200% of size of the training
+                       set
+    - feature_subsampling: real number between 0 and 1; fraction of features to subsample
+    - label_switching: real number between 0 and 1; fraction of labels to switch
+    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
+    - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    
+    Ouput:
+    NONE
+    '''
+    
     folder_paths = {
         'No': '../Datasets/TrainData/',
         'Dict': '../Datasets/DictAttackData/',
@@ -23,8 +43,30 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
             for perc_label in label_switching:
                 print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, attack, classifier)
     
+    return
+    
             
-def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack='Dict', classifier='logisticReg'):
+def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, 
+                        attack='Dict', 
+                        classifier='logisticReg'):
+    '''
+    Inputs:
+    - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
+                     averaged
+    - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
+    - train_folder: string; path to correct attack folder training sets
+    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
+    - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    
+    Ouput:
+    - error: error value
+    - TPR: true positive rate
+    - FPR: false positive rate
+    - FNR: false negative rate
+    - TNR: true negative rate
+    - AUC: AUC value (see sklearn.metrics.roc_auc_score documentation)
+    '''
+    
     try:
         learner = importlib.import_module(classifier)
     except ImportError as error:
@@ -82,8 +124,34 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack='Dic
     
     return (error, TPR, FPR, FNR, TNR, AUC)
 
-def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, 
-                          perc_poisoning, train_folder, attack='Dict', classifier = 'logisticReg'):
+def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, train_folder, 
+                          attack='Dict', 
+                          classifier = 'logisticReg'):
+    '''
+    Inputs:
+    - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
+                     averaged
+    - no_predictors: integer number of classifiers to bag
+    - perc_instances: real number fraction of the training set to put into a bootstrap replicate set; .5 = 50% of 
+                      size of the training set, 1 = 100% of size of the training set, 2 = 200% of size of the training
+                      set
+    - perc_feature_subsampling: real number between 0 and 1; fraction of features to subsample
+    - perc_label_switching: real number between 0 and 1; fraction of labels to switch
+    - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
+    - train_folder: string; path to correct attack folder training sets
+    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
+    - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    
+    Ouputs:
+    - errors: 1 * N Numpy array of error values
+              with N: number of classifiers bagged
+    - TPRs: 1 * N Numpy array of true positive rates
+    - FPRs: 1 * N Numpy array of false positive rates
+    - FNRs: 1 * N Numpy array of false negative rates
+    - TNRs: 1 * N Numpy array of true negative rates
+    - AUCs: 1 * N Numpy array of AUC values (see sklearn.metrics.roc_auc_score documentation)
+    '''
+                          
     test_folder = '../Datasets/TestData/'          
 
     if (perc_poisoning != 0):
@@ -157,10 +225,33 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
       
     saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,AUCs,attack,classifier)
     
-    return (errors, TPRs, FPRs, FNRs, TNRs)
+    return (errors, TPRs, FPRs, FNRs, TNRs, AUCs)
         
-def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, 
-                errors, TPRs, FPRs, FNRs, TNRs, AUCs, attack='Dict', classifier = 'logisticReg'):
+def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, errors, TPRs, FPRs, FNRs, TNRs, AUCs, 
+                attack='Dict', 
+                classifier = 'logisticReg'):
+    '''
+    Inputs:
+    - perc_instances: real number fraction of the training set to put into a bootstrap replicate set; .5 = 50% of 
+                      size of the training set, 1 = 100% of size of the training set, 2 = 200% of size of the training
+                      set
+    - perc_feature_subsampling: real number between 0 and 1; fraction of features to subsample
+    - perc_label_switching: real number between 0 and 1; fraction of labels to switch
+    - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
+    - errors: 1 * N Numpy array of error values
+              with N: number of classifiers bagged
+    - TPRs: 1 * N Numpy array of true positive rates
+    - FPRs: 1 * N Numpy array of false positive rates
+    - FNRs: 1 * N Numpy array of false negative rates
+    - TNRs: 1 * N Numpy array of true negative rates
+    - AUCs: 1 * N Numpy array of AUC values (see sklearn.metrics.roc_auc_score documentation)
+    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
+    - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    
+    Ouput:
+    NONE
+    '''            
+    
     test_results = concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs)            
                 
     results_folder = '../Results/'
@@ -184,8 +275,24 @@ def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, p
     results = pd.DataFrame(test_results)
     results.to_csv(path + filename, index=False, header=test_header)
     
+    return
+    
     
 def concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs):    
+    '''
+    Inputs:
+    - errors: 1 * N Numpy array of error values
+              with N: number of classifiers bagged
+    - TPRs: 1 * N Numpy array of true positive rates
+    - FPRs: 1 * N Numpy array of false positive rates
+    - FNRs: 1 * N Numpy array of false negative rates
+    - TNRs: 1 * N Numpy array of true negative rates
+    - AUCs: 1 * N Numpy array of AUC values (see sklearn.metrics.roc_auc_score documentation)
+    
+    Output:
+    - test_results: N * 6 Numpy matrix with columns =[errors.T, TPRs.T, FPRs.T, FNRs.T, TNRs.T, AUCs.T]
+    '''
+    
     test_results = np.column_stack((errors, TPRs, FPRs, FNRs, TNRs, AUCs))
     
     return test_results
