@@ -23,7 +23,7 @@ from sklearn.cross_validation import train_test_split
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                   perc_instances=1, perc_feature_subsampling=1, perc_label_switching=0,
-                  classifier = 'logisticReg'):
+                  classifier='logisticReg'):
     '''
     Returns array of error rates for each time a predictor is added to the
     bagged classifier. The last error rate in the bag represents the error
@@ -46,7 +46,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
                                 features without replacement)
     - perc_label_switching: Float between 0 and 1 representing the percentage of labels to switch
                             (flip) in the training set
-    - classifier: string classifier name; Options: 1) 'logisticReg' 2) 'adaline'
+    - classifier: default string classifier name; Options: 1) 'logisticReg' 2) 'adaline'
          
     Output:
     - errors: 1 * no_predictors array listing the error at each bagging iteration 
@@ -65,6 +65,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     FPRs = []
     FNRs = []
     TNRs = []
+    AUCs = []
     if (perc_feature_subsampling != 1):
         X_train, X_test = fs.featureSubsampling(X_train, X_test, perc_feature_subsampling)
     if (perc_label_switching != 0):
@@ -77,7 +78,9 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
    
     predictions = votes
     
-    errors.append(met.computeError(predictions, y_test))
+    errors.append(met.computeError(y_test, predictions))
+    
+    AUCs.append(met.computeAUC(y_test, predictions))
     
     [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
     
@@ -89,6 +92,9 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     TNRs.append(TNR)
     
     for ith_predictor in range(1, no_predictors):
+        if (ith_predictor%10 == 0):
+            print 'Predictor:', ith_predictor
+            
         replicate, labels = swr.generateReplicate(X_train, y_train)
         
         classifier_weights = classifier.fit(replicate, labels)
@@ -97,7 +103,9 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
         
         predictions = computeClass(votes, ith_predictor + 1)
         
-        errors.append(met.computeError(predictions, y_test))
+        errors.append(met.computeError(y_test, predictions))
+        
+        AUCs.append(met.computeAUC(y_test, predictions))
         
         [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
     
@@ -108,7 +116,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
         FNRs.append(FNR)
         TNRs.append(TNR)
                
-    return (errors, TPRs, FPRs, FNRs, TNRs)
+    return (errors, TPRs, FPRs, FNRs, TNRs, AUCs)
 
     
 def computeClass(votes, ith_predictor):

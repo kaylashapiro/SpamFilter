@@ -43,7 +43,7 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     else:
         data_folder = ''
 
-    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     # Plain Old Bagging without feature subsampling or label switching
     print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
@@ -90,6 +90,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
     sum_error, sum_TPR, sum_FPR, sum_FNR, sum_TNR, sum_AUC = 0, 0, 0, 0, 0, 0
     
     for iter in xrange(no_iterations): 
+        print 'STARTING ITER:', iter
         X_train_file = 'X_train_' + str(iter) + '.csv'
         y_train_file = 'y_train_' + str(iter) + '.csv'
         X_test_file = 'X_test_' + str(iter) + '.csv'
@@ -117,6 +118,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         sum_FPR += FPR
         sum_FNR += FNR
         sum_TNR = TNR
+        
         
     error = sum_error/no_iterations # ADD DIVIDE BY ZERO EXCEPTION OR DO A CHECK SOMEWHERE ELSE FOR NO_ITERATIONS
     TPR = sum_TPR/no_iterations
@@ -187,6 +189,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     sum_AUCs = np.array([sum_AUCs])
     
     for iter in xrange(1,no_iterations): 
+        print 'STARTING ITER:', iter
         X_train_file = 'X_train_' + str(iter) + '.csv'
         y_train_file = 'y_train_' + str(iter) + '.csv'
         X_test_file = 'X_test_' + str(iter) + '.csv'
