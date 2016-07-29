@@ -302,8 +302,8 @@ def concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs):
 def main():
 
     # TEST PARAMETERS
-    no_iterations = 2
-    no_predictors = 3
+    no_iterations = 10
+    no_predictors = 80
     
     #attacks = ['No', 'Dict', 'Empty']
     attack='No' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
