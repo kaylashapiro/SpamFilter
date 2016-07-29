@@ -35,18 +35,28 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     }
     
     train_folder = folder_paths[attack]
+    
+    test_folder = '../Datasets/TestData/'          
 
-    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, attack, classifier)
+    if (perc_poisoning != 0):
+        data_folder = str(perc_poisoning) + '_perc_poison/'
+    else:
+        data_folder = ''
+
+    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    
+    # Plain Old Bagging without feature subsampling or label switching
+    print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
-                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, attack, classifier)
+                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     return
     
             
-def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, 
+def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, 
                         attack='Dict', 
                         classifier='logisticReg'):
     '''
@@ -55,6 +65,8 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder,
                      averaged
     - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
     - train_folder: string; path to correct attack folder training sets
+    - test_folder: string; path to correct test set folder
+    - data_folder: string; folder for a given percentage of poisoning; empty for 'NoAttack'
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
     
@@ -74,13 +86,6 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder,
         print "Failed to import learner module in runTests2.py"
         print "Available modules: 1) 'logisticReg' 2) 'adaline'"
         sys.exit(0)
-        
-    test_folder = '../Datasets/TestData/'
-    
-    if (perc_poisoning != 0):
-        data_folder = str(perc_poisoning) + '_perc_poison/'
-    else:
-        data_folder = ''
     
     sum_error, sum_TPR, sum_FPR, sum_FNR, sum_TNR, sum_AUC = 0, 0, 0, 0, 0, 0
     
@@ -120,11 +125,12 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder,
     TNR = sum_TNR/no_iterations
     AUC = sum_AUC/no_iterations
     
-    saveToFile(1,1,0,perc_poisoning,error,TPR,FPR,FNR,TNR,AUC,attack,classifier)
+    # Arguments 0,0,0 signal base classifier
+    saveToFile(0,0,0,perc_poisoning,error,TPR,FPR,FNR,TNR,AUC,attack,classifier)
     
     return (error, TPR, FPR, FNR, TNR, AUC)
 
-def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, train_folder, 
+def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, train_folder, test_folder, data_folder,
                           attack='Dict', 
                           classifier = 'logisticReg'):
     '''
@@ -139,6 +145,8 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     - perc_label_switching: real number between 0 and 1; fraction of labels to switch
     - perc_poisoning: integer between 0 and 100; percentage of poisoning of the training set
     - train_folder: string; path to correct attack folder training sets
+    - test_folder: string; path to correct test set folder
+    - data_folder: string; folder for a given percentage of poisoning; empty for 'NoAttack'
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
     
@@ -151,30 +159,23 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     - TNRs: 1 * N Numpy array of true negative rates
     - AUCs: 1 * N Numpy array of AUC values (see sklearn.metrics.roc_auc_score documentation)
     '''
-                          
-    test_folder = '../Datasets/TestData/'          
-
-    if (perc_poisoning != 0):
-        data_folder = str(perc_poisoning) + '_perc_poison/'
-    else:
-        data_folder = ''
     
     X_train_file = 'X_train_' + str(0) + '.csv'
     y_train_file = 'y_train_' + str(0) + '.csv'
     X_test_file = 'X_test_' + str(0) + '.csv'
     y_test_file = 'y_test_' + str(0) + '.csv'
     
-    df_train = pd.read_csv(train_folder + data_folder + X_train_file, header = None)
-    X_train = np.array(df_train)
+    df_X_train = pd.read_csv(train_folder + data_folder + X_train_file, header = None)
+    X_train = np.array(df_X_train)
     
-    df_train = pd.read_csv(train_folder + data_folder + y_train_file, header = None)
-    y_train = np.array(df_train)
+    df_y_train = pd.read_csv(train_folder + data_folder + y_train_file, header = None)
+    y_train = np.array(df_y_train)
         
-    df_test = pd.read_csv(test_folder + X_test_file, header = None)
-    X_test = np.array(df_test)
+    df_X_test = pd.read_csv(test_folder + X_test_file, header = None)
+    X_test = np.array(df_X_test)
         
-    df_test = pd.read_csv(test_folder + y_test_file, header = None)
-    y_test = np.array(df_test)
+    df_y_test = pd.read_csv(test_folder + y_test_file, header = None)
+    y_test = np.array(df_y_test)
     
     [sum_errors, sum_TPRs, sum_FPRs, sum_FNRs, sum_TNRs, sum_AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                                                                                         perc_instances, perc_feature_subsampling, perc_label_switching)
@@ -212,7 +213,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
         sum_TNRs = np.concatenate((sum_TNRs,np.array([TNRs])), axis=0)
         sum_AUCs = np.concatenate((sum_AUCs,np.array([AUCs])), axis=0)
     
-    print sum_errors
+    #print sum_errors
     
     errors = np.mean(sum_errors, axis=0)
     TPRs = np.mean(sum_TPRs, axis=0)
@@ -221,7 +222,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     TNRs = np.mean(sum_TNRs, axis=0)
     AUCs = np.mean(sum_AUCs, axis=0)
     
-    print errors
+    #print errors
       
     saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,AUCs,attack,classifier)
     
@@ -301,13 +302,19 @@ def concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs):
 def main():
 
     # TEST PARAMETERS
-    no_iterations = 1
-    no_predictors = 10
+    no_iterations = 2
+    no_predictors = 3
     
-    attack='Dict' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
-    classifier = 'logisticRegression/' # Choose from 1) 'logisticReg', 2) 'adaline'
+    #attacks = ['No', 'Dict', 'Empty']
+    attack='No' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
+    #classifiers = ['logisticReg', 'adaline']
+    classifier = 'logisticReg' # Choose from 1) 'logisticReg', 2) 'adaline'
     
-    perc_poisoning = [10, 20, 30]
+    # ATTACK PARAMETERS
+    perc_poisoning = [0] # No Attack
+    # perc_poisoning = [10, 20, 30] # Attack
+    
+    # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
     feature_subsampling = [.5, .7, .9]
     label_switching = [0.0, 0.1, 0.2]
