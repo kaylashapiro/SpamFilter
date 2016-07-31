@@ -308,9 +308,9 @@ def main():
     no_predictors = 60
     
     #attacks = ['No', 'Dict', 'Empty']
-    attack='Empty' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
+    attack='Dict' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
     #classifiers = ['logisticReg', 'adaline']
-    classifier = 'adaline' # Choose from 1) 'logisticReg', 2) 'adaline'
+    classifier = 'logisticReg' # Choose from 1) 'logisticReg', 2) 'adaline'
     
     # ATTACK PARAMETERS
     #perc_poisoning = [0] # No Attack
