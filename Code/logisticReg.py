@@ -41,7 +41,7 @@ def sigmoid(z):
 
     return prediction
 
-def cost(trueValues, predictions):
+def computeCost(trueValues, predictions):
     '''
     Returns the average cost associated with each prediction for an
     example given its true value.
@@ -184,8 +184,7 @@ def predictSoft(X, theta, add_bias=True):
     
     
 def main():
-    #x = np.load('LingSpamFeatures1000.npy')
-    #y = np.load('LingSpamLabels1000.npy')
+
     df_x = pd.read_csv('Features.csv', header = None)
     x = np.array(df_x)
     print x
@@ -193,35 +192,14 @@ def main():
     df_y = pd.read_csv('Labels.csv', header = None)
     y = np.array(df_y)
     print y   
+    
     w = fit(x,y,0.1)
+    
     pred = predict(x,w)
-    error = computeError(y,pred)
-    [TP, FP, FN, TN] = computeMetrics(y, pred)
-    [FPR, TPR, thresholds] = computeROC(y, pred)
-    roc_auc = auc(FPR,TPR)
-    #[TPR,FPR,FNR,TNR] = computeRates(TP, FP, FN, TN)
     
+    print computeError(y,pred)
     
-    print 'Error:', error
-    print 'TP:', TP
-    print 'FP:', FP
-    print 'FN:', FN
-    print 'TN:', TN
-    print 'FPR:', FPR
-    print 'TPR', TPR
-    #print 'FNR:', FNR
-    #print 'TNR:', TNR
-    print thresholds
-    
-    plt.title('Receiver Operating Characteristic')
-    plt.plot(FPR, TPR, 'b', label = 'AUC = %0.2f' % roc_auc)
-    plt.legend(loc = 'lower right')
-    plt.plot([0, 1], [0, 1],'r--')
-    plt.xlim([0, 1])
-    plt.ylim([0, 1])
-    plt.ylabel('True Positive Rate')
-    plt.xlabel('False Positive Rate')
-    plt.show()
+    return
     
 
 if __name__ == '__main__':
