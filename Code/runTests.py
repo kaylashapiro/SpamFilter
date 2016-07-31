@@ -43,7 +43,7 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     else:
         data_folder = ''
 
-    #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     # Plain Old Bagging without feature subsampling or label switching
     print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
@@ -52,7 +52,6 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
                 print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
-    
     return
     
             
@@ -305,8 +304,8 @@ def concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs):
 def main():
 
     # TEST PARAMETERS
-    no_iterations = 10
-    no_predictors = 80
+    no_iterations = 5
+    no_predictors = 60
     
     #attacks = ['No', 'Dict', 'Empty']
     attack='No' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
@@ -315,7 +314,7 @@ def main():
     
     # ATTACK PARAMETERS
     perc_poisoning = [0] # No Attack
-    # perc_poisoning = [10, 20, 30] # Attack
+    #perc_poisoning = [10, 20, 30] # Attack
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
