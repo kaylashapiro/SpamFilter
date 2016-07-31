@@ -34,7 +34,7 @@ def addBias(X):
     - X_bias: N * (D + 1) Numpy matrix of binary feature values
               consisting of a column of ones + X
     '''
-    
+    print X.shape
     X_bias = np.insert(X, 0, 1, axis=1)
     
     return X_bias
@@ -63,9 +63,7 @@ def fit(features, labels,
     Returns the optimal weights for a given training set (features
     and corresponding label inputs) for the ADALINE model.
     These weights are found using the gradient descent method.
-    
-    !!!! ASSUMES BIAS HAS BEEN ADDED !!!!!
-    
+        
     TRAINING PHASE
     Inputs:
     - features: N * D Numpy matrix of binary values (0 and 1)
@@ -83,7 +81,7 @@ def fit(features, labels,
     TODO implement an autostop if cost is rising instead of falling ?
     '''
     ## 0. Prepare notations
-    
+    features = addBias(features)
     X, Y = features, labels
     N, D = features.shape   # N #training samples; D #features
     cost = []               # keep track of cost
@@ -125,10 +123,10 @@ def fit(features, labels,
         if verbose: print('iteration %d:\tcost = %.3f' % (i, cost[-1]))
         i += 1
 
-    return W, cost, error
+    return W, cost, error, current_error
 
 
-def predict(parameters, features,
+def predict(features, weights,
         ## params
         ham_label=0,
         spam_label=1,
@@ -138,8 +136,10 @@ def predict(parameters, features,
     TODO not sure what makes sense to measure here ?
          => performance can be calculated outside the function
     '''
+    features = addBias(features)
+    
     ## notation
-    X, W = features, parameters
+    X, W = features, weights
     N, D = features.shape
 
     ## apply model
@@ -186,24 +186,25 @@ def main():
                   [1]],
                   dtype=np.int8) #* 2 - 1
     '''
-    df_x = pd.read_csv('Features.csv', header = None)
+    df_x = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/X_train_0.csv', header = None)
     x = np.array(df_x)
-    x = addBias(x)
+    #x = addBias(x)
     print x
     
-    df_y = pd.read_csv('Labels.csv', header = None)
+    df_y = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/y_train_0.csv', header = None)
     y = np.array(df_y)
     print y   
                     
     ## train model
-    weights, cost, error = fit(features=x, labels=y,
-        learning_rate=1,
+    weights, cost, error, final_error = fit(features=x, labels=y,
+        learning_rate=.3,
         termination_condition=max_iters(100))
-    print('weights: %s' % ([' %.3f' % w for w in weights]))
+    #print('weights: %s' % ([' %.3f' % w for w in weights]))
     #print cost
     #print error
     predictions = predict(weights, x)
-    print predictions
+    #print predictions
+    print 'Final Error:', final_error
     
     plt.figure(figsize=(10,6), dpi=120)
         
