@@ -34,7 +34,7 @@ def addBias(X):
     - X_bias: N * (D + 1) Numpy matrix of binary feature values
               consisting of a column of ones + X
     '''
-    print X.shape
+    #print X.shape
     X_bias = np.insert(X, 0, 1, axis=1)
     
     return X_bias
@@ -123,7 +123,7 @@ def fit(features, labels,
         if verbose: print('iteration %d:\tcost = %.3f' % (i, cost[-1]))
         i += 1
 
-    return W, cost, error, current_error
+    return W#, cost, error, current_error
 
 
 def predict(features, weights,
@@ -141,7 +141,7 @@ def predict(features, weights,
     ## notation
     X, W = features, weights
     N, D = features.shape
-
+    #print W
     ## apply model
     O = np.dot(X, W)
 
@@ -153,7 +153,7 @@ def predict(features, weights,
     else:   ## ham label is assumed -1, spam label assumed 1
         T = np.ones(O.shape)
         T[O < 0] = -1
-
+    #print T
     return T
 
 
@@ -194,7 +194,16 @@ def main():
     df_y = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/y_train_0.csv', header = None)
     y = np.array(df_y)
     print y   
-                    
+   
+    df_x_test = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/X_test_0.csv', header = None)
+    x = np.array(df_x)
+    #x = addBias(x)
+    #print x
+    
+    df_y_test = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/y_test_0.csv', header = None)
+    y = np.array(df_y)
+    #print y   
+   
     ## train model
     weights, cost, error, final_error = fit(features=x, labels=y,
         learning_rate=.3,
@@ -202,7 +211,7 @@ def main():
     #print('weights: %s' % ([' %.3f' % w for w in weights]))
     #print cost
     #print error
-    predictions = predict(weights, x)
+    predictions = predict(x_test, weights)
     #print predictions
     print 'Final Error:', final_error
     
