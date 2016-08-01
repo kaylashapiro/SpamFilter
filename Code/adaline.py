@@ -175,10 +175,10 @@ def predict(features, weights,
 def main():
     '''Test Adaline training'''
 
-    df_x = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/TestData/y_train_0.csv', header = None)
     y = np.array(df_y)   
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_0.csv', header = None)
