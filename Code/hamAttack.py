@@ -106,13 +106,13 @@ def poisonData(features, labels,
 
     ## randomly replace some samples with the poisoned ones
     ## so that total number of samples doesn't change
-    poisoned_indices = np.random.choice(N, num_poisoned)
+    poisoned_indices = np.random.choice(N, num_poisoned,replace=False)
     print poisoned_indices    
 
     X[poisoned_indices] = 0
 
     ## "turn on" features whose presence is indicative of ham
-    X[poisoned_indices][:, salient_indices] = 1
+    X[poisoned_indices][salient_indices] = 1
 
     ## the contamination assumption
     Y[poisoned_indices] = spam_label
