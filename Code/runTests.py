@@ -43,7 +43,7 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     else:
         data_folder = ''
 
-    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     # Plain Old Bagging without feature subsampling or label switching
     print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
