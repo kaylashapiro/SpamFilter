@@ -51,10 +51,10 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
-            if (perc_bag == 60 && perc_feat == 50):
-                continue
-            else:    
-                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+                if (perc_bag == 60 and perc_feat == 50):
+                    continue
+                else:    
+                    print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     return
     
             
