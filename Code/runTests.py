@@ -46,11 +46,14 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     #print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     # Plain Old Bagging without feature subsampling or label switching
-    print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    #print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
+            if (perc_bag == 60 && perc_feat == 50):
+                continue
+            else:    
                 print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
     return
     
@@ -310,7 +313,7 @@ def main():
     #attacks = ['No', 'Dict', 'Empty']
     attack='No' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
     #classifiers = ['logisticReg', 'adaline']
-    classifier = 'adaline' # Choose from 1) 'logisticReg', 2) 'adaline'
+    classifier = 'logisticReg' # Choose from 1) 'logisticReg', 2) 'adaline'
     
     # ATTACK PARAMETERS
     perc_poisoning = [0] # No Attack
