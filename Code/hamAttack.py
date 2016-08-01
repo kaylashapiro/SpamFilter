@@ -67,7 +67,7 @@ def select_using_MI(features, labels, threshold=0.01, ham_label=0):
     return salient_indices
 
 
-def apply(features, labels,
+def poisonData(features, labels,
         ## params
         percentage_samples_poisoned,
         percentage_features_poisoned=1.0,
@@ -102,10 +102,13 @@ def apply(features, labels,
 
     ## find the most salient features, indicative of the ham class
     salient_indices = feature_selection_method(X, Y, threshold)
+    print salient_indices
 
     ## randomly replace some samples with the poisoned ones
     ## so that total number of samples doesn't change
     poisoned_indices = np.random.choice(N, num_poisoned)
+    print poisoned_indices    
+
     X[poisoned_indices] = 0
 
     ## "turn on" features whose presence is indicative of ham
@@ -114,4 +117,35 @@ def apply(features, labels,
     ## the contamination assumption
     Y[poisoned_indices] = spam_label
 
-    return X, Y
+    return (X, Y)
+
+# Main function to test the ham attack
+def main():
+    x = np.array([[1, 0, 1],		
+        [0, 0, 0],		
+        [1, 0, 1],		
+        [1, 1, 1],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [0, 1, 0]],		
+        dtype=np.int8)		
+    y = np.array([[1],		
+        [1],		
+        [1],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [1]],		
+        dtype=np.int8) #* 2 - 1		
+
+    print poisonData(x,y,.3)
+
+# This is the standard boilerplate that calls the main() function.
+if __name__ == '__main__':
+    main()
