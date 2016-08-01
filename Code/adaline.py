@@ -52,12 +52,12 @@ def computeCost(trueValues, predictions):
 def fit(features, labels,
         ## params:
         initial_weights=None,
-        learning_rate=0.05,
+        learning_rate=0.2,
         termination_condition=None,
         threshold=1e-5,
         ham_label=0,
         spam_label=1,
-        verbose=True,
+        verbose=False,
         add_bias = True
         ):
     '''
@@ -78,7 +78,7 @@ def fit(features, labels,
     - W: D * 1 Numpy vector of real values
     '''   
     if not termination_condition:
-        termination_condition = max_iters(50)
+        termination_condition = max_iters(100)
         
     if (add_bias):
         features = addBias(features)
@@ -95,6 +95,7 @@ def fit(features, labels,
     ## 2. Evaluate the termination condition
     epoch = 1
     last_epoch_error = 1e6
+
     while not termination_condition():
         ## current iteration classifier output
         O = np.dot(X, W)
@@ -123,12 +124,12 @@ def fit(features, labels,
         #cost.append(current_cost)
         
         # THINK ABOUT THE EPOCH VALUE
-        if (epoch > 100 and np.abs(last_epoch_error - current_error) < threshold):
+        if (np.abs(last_epoch_error - current_error) < threshold):
             break
             
         last_epoch_error = current_error
 
-        if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
+        #if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
         epoch += 1
 
     return W
@@ -178,7 +179,7 @@ def main():
     df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TestData/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/TrainData/y_train_0.csv', header = None)
     y = np.array(df_y)   
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_0.csv', header = None)
