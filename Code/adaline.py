@@ -120,8 +120,8 @@ def fit(features, labels,
         current_error = computeError(T, Y)
         error.append(current_error)
         
-        current_cost = computeCost(Y, O)
-        cost.append(current_cost)
+        #current_cost = computeCost(Y, O)
+        #cost.append(current_cost)
         
         # THINK ABOUT THE EPOCH VALUE
         if (np.abs(last_epoch_error - current_error) < threshold):
@@ -129,7 +129,7 @@ def fit(features, labels,
             
         last_epoch_error = current_error
 
-        if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
+        #if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
         epoch += 1
 
     return W
