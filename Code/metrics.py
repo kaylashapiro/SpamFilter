@@ -85,17 +85,26 @@ def computeAUC(y, predictions):
     return AUC
     
 def computeRates(TP, FP, FN, TN):
-    TPR = float(TP)/(TP + FN)
-    FNR = 1 - TPR
-    TNR = float(TN)/(TN + FP)
-    FPR = 1 - TNR
+    if ((TP + FN) == 0):
+        TPR = float('nan')
+        FNR = float('nan')
+    else:
+        TPR = float(TP)/(TP + FN)
+        FNR = 1 - TPR
+    if ((TN + FP) == 0):
+        TNR = float('nan')
+        FPR = float('nan')
+    else:
+        TNR = float(TN)/(TN + FP)
+        FPR = 1 - TNR
     
     return (TPR, FPR, FNR, TNR)
     
 def main():  
     y_true = np.array([0, 0, 1, 1])
     y_scores = np.array([0, 0, 0, 0])
-    print computeAUC(y_true, y_scores)
+    TP, FP, FN, TN = computeMetrics(y_true, y_scores)
+    print computeRates(TP,FP,FN,TN)
     
     
     
