@@ -52,12 +52,12 @@ def computeCost(trueValues, predictions):
 def fit(features, labels,
         ## params:
         initial_weights=None,
-        learning_rate=0.2,
+        learning_rate=0.05,
         termination_condition=None,
         threshold=1e-5,
         ham_label=0,
         spam_label=1,
-        verbose=False,
+        verbose=True,
         add_bias = True
         ):
     '''
@@ -120,8 +120,8 @@ def fit(features, labels,
         current_error = computeError(T, Y)
         error.append(current_error)
         
-        #current_cost = computeCost(Y, O)
-        #cost.append(current_cost)
+        current_cost = computeCost(Y, O)
+        cost.append(current_cost)
         
         # THINK ABOUT THE EPOCH VALUE
         if (np.abs(last_epoch_error - current_error) < threshold):
@@ -129,7 +129,7 @@ def fit(features, labels,
             
         last_epoch_error = current_error
 
-        #if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
+        if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
         epoch += 1
 
     return W
@@ -176,10 +176,10 @@ def predict(features, weights,
 def main():
     '''Test Adaline training'''
 
-    df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../Datasets/DictAttackData/10_perc_poison/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/DictAttackData/10_perc_poison/y_train_0.csv', header = None)
     y = np.array(df_y)   
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_0.csv', header = None)
@@ -189,9 +189,7 @@ def main():
     y_test = np.array(df_y_test)
    
     ## train model
-    weights = fit(features=x, labels=y,
-        learning_rate=.2,
-        termination_condition=max_iters(1000))
+    weights = fit(features=x, labels=y)
         
 
     predictions = predict(x_test, weights)
