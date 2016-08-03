@@ -28,7 +28,6 @@ def boost(X, y, sample_weights, learning_rate=.1, epochs=100, perfection=False):
         alpha = float('inf')
         return classifier, sample_weights, alpha, perfection
     
-    
     alpha = .5 * np.log((1-error)/error)
     print 'e=%.2f a=%.2f'%(error, alpha)
     
@@ -48,7 +47,7 @@ def fit(X, y, learning_rate=.1, epochs=100, no_predictors=5, add_bias=True):
         if perfection:
             break
     
-    return 
+    return classifier
     
 def main():
 
@@ -87,7 +86,9 @@ def main():
     print y
     
     w = fit(x,y)
+    print 'Final Classifier:', w
     
+    print w.predict(x)
     return
     
 
