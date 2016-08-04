@@ -92,7 +92,7 @@ def fit(X, y, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
     sample_weight = np.array([float(1)/N,] * N)
     print 'Initial Weights:', sample_weight
     
-    for iter in xrange(1, no_predictors):
+    for iter in xrange(no_predictors):
         classifier, sample_weight, alpha, terminate = boost(X, y, sample_weight)
         classifiers.append(classifier)
         alphas.append(alpha)
