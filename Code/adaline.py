@@ -11,25 +11,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from metrics import computeError
-from gradientDescent import max_iters
-
-def addBias(X): 
-    '''
-    Adds bias term to the training set.
-    
-    Input:  
-    - X: N * D Numpy matrix of binary feature values (0 and 1)
-         with N: the number of training examples
-         and  D: the number of features for each example
-    
-    Output:
-    - X_bias: N * (D + 1) Numpy matrix of binary feature values
-              consisting of a column of ones + X
-    '''
-    X_bias = np.insert(X, 0, 1, axis=1)
-    
-    return X_bias
-    
+from helpers import addBias
+from gradientDescent import max_iters  
 
 def computeCost(trueValues, predictions):
     '''
@@ -123,7 +106,6 @@ def fit(features, labels,
         #current_cost = computeCost(Y, O)
         #cost.append(current_cost)
         
-        # THINK ABOUT THE EPOCH VALUE
         if (np.abs(last_epoch_error - current_error) < threshold):
             break
             
