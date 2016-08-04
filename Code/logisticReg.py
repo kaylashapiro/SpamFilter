@@ -4,26 +4,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, roc_curve, auc
 from metrics import computeError, computeMetrics, computeROC, computeRates
+from helpers import addBias
 import matplotlib.pyplot as plt
-
-def addBias(X): 
-    '''
-    Adds bias term to the training set.
-    
-    Input:
-    
-    - X: N * D Numpy matrix of binary feature values (0 and 1)
-         with N: the number of training examples
-         and  D: the number of features for each example
-    
-    Output:
-    - X_bias: N * (D + 1) Numpy matrix of binary feature values
-              consisting of a column of ones + X
-    '''
-    
-    X_bias = np.insert(X, 0, 1, axis=1)
-    
-    return X_bias
 
 def sigmoid(z):
     '''
@@ -185,11 +167,11 @@ def predictSoft(X, theta, add_bias=True):
     
 def main():
 
-    df_x = pd.read_csv('Features.csv', header = None)
+    df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
     x = np.array(df_x)
     print x
     
-    df_y = pd.read_csv('Labels.csv', header = None)
+    df_y = pd.read_csv('../Datasets/TrainData/y_train_0.csv', header = None)
     y = np.array(df_y)
     print y   
     
