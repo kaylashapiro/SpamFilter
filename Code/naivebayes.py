@@ -9,6 +9,7 @@ Inspired by Luis Munoz's MATLAB code for the Naive Bayes classifier model.
 import numpy as np
 import pandas as pd
 from metrics import computeError
+from metrics import computeMetrics
 from sklearn.naive_bayes import BernoulliNB
 
 def process_parameters(p, tolerance=1e-10):
@@ -107,7 +108,7 @@ def predict(features, parameters,
     if ham_label == -1:
         predicted = predicted * 2 - 1
 
-    return predicted
+    return np.array(predicted).astype(int) #To match the format of my other classifiers and for bagging
 
 def main():
     '''Test NaiveBayes training'''
@@ -116,13 +117,13 @@ def main():
     x = np.array(df_x)
     
     df_y = pd.read_csv('../Datasets/TrainData/y_train_1.csv', header = None)
-    y = np.ravel(np.array(df_y))
+    y = np.array(df_y)
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_1.csv', header = None)
     x_test = np.array(df_x_test)
     
     df_y_test = pd.read_csv('../Datasets/TestData/y_test_1.csv', header = None)
-    y_test = np.ravel(np.array(df_y_test))
+    y_test = np.array(df_y_test)
    
     ## train model
     weights = fit(x, y)        
@@ -136,6 +137,7 @@ def main():
     pred = classifier.predict(x_test)
     
     print computeError(y_test, pred)
+    print computeMetrics(y_test, pred)
     return
 
 if __name__ == '__main__':
