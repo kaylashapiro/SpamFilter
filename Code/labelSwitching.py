@@ -29,20 +29,7 @@ def labelSwitching(y, perc_label_switching):
 def main():
     '''Test Label Switching'''
     ## dummy data
-    ## 10 training samples and 3 features
-    ## so a 10 * 3 matrix 
     
-    x = np.array([[1, 0, 1],
-                  [0, 0, 0],
-                  [1, 0, 1],
-                  [1, 1, 1],
-                  [1, 1, 0],
-                  [1, 1, 0],
-                  [1, 1, 0],
-                  [1, 1, 0],
-                  [1, 1, 0],
-                  [0, 1, 0]],
-                  dtype=np.int8)
     y = np.array([[1],
                   [1],
                   [1],
@@ -53,7 +40,7 @@ def main():
                   [0],
                   [0],
                   [1]],
-                  dtype=np.int8) #* 2 - 1
+                  dtype=np.int8) #* 2 - 1                 
                   
     print y
     
