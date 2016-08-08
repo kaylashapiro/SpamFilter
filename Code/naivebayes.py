@@ -1,5 +1,4 @@
 # coding: utf-8
-from __future__ import division
 
 '''
 Adapted from: https://github.com/galvanic/adversarialML/blob/master/classifiers/naivebayes.py
@@ -10,7 +9,7 @@ Inspired by Luis Munoz's MATLAB code for the Naive Bayes classifier model.
 import numpy as np
 import pandas as pd
 from metrics import computeError
-from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
 
 def process_parameters(p, tolerance=1e-10):
     '''
@@ -50,7 +49,7 @@ def fit(features, labels,
     tolerance = 1e-30 ## tolerance factor (to avoid under/overflows)
 
     ## estimate prior probability of spam class
-    prior_spam = np.sum(Y == spam_label) / N
+    prior_spam = np.sum(Y == spam_label) / np.float(N)
     prior_ham  = 1 - prior_spam
 
     indices_ham  = np.nonzero(Y ==  ham_label)[0]
@@ -60,8 +59,8 @@ def fit(features, labels,
 
     ## estimate likelihood parameters for each class
     ## looks at presence of features in each class
-    likeli_ham  = np.sum(X[indices_ham],  axis=0) / N_ham
-    likeli_spam = np.sum(X[indices_spam], axis=0) / N_spam
+    likeli_ham  = np.sum(X[indices_ham],  axis=0) / np.float(N_ham)
+    likeli_spam = np.sum(X[indices_spam], axis=0) / np.float(N_spam)
 
     likeli_ham, likeli_spam = map(lambda p: p.reshape((D, 1)), [likeli_ham, likeli_spam])
     likeli_ham, likeli_spam = map(process_parameters, [likeli_ham, likeli_spam])
@@ -117,13 +116,13 @@ def main():
     x = np.array(df_x)
     
     df_y = pd.read_csv('../Datasets/TrainData/y_train_1.csv', header = None)
-    y = np.array(df_y)   
+    y = np.ravel(np.array(df_y))
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_1.csv', header = None)
     x_test = np.array(df_x_test)
     
     df_y_test = pd.read_csv('../Datasets/TestData/y_test_1.csv', header = None)
-    y_test = np.array(df_y_test)
+    y_test = np.ravel(np.array(df_y_test))
    
     ## train model
     weights = fit(x, y)        
@@ -132,7 +131,7 @@ def main():
     
     print computeError(y_test, predictions)
     
-    classifier = GaussianNB()
+    classifier = BernoulliNB()
     classifier.fit(x, np.ravel(y))
     pred = classifier.predict(x_test)
     
