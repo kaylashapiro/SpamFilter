@@ -18,7 +18,7 @@ def computeError(y, predictions):
     - error: float average error
     '''
     
-    error = np.mean(y != predictions)
+    error = np.mean(np.ravel(y) != np.ravel(predictions))
     
     return error
     
@@ -40,7 +40,8 @@ def computeMetrics(y, predictions):
     - FN: number of false negatives
     - TN: number of true negatives
     '''
-    cm  = confusion_matrix(y, predictions)
+    #N = y.shape[0]
+    cm  = confusion_matrix(np.ravel(y), np.ravel(predictions))
 
     TP = cm[0][0]
     FP = cm[0][1]
@@ -65,7 +66,7 @@ def computeROC(y, predictions, pos_label=1):
     - TPR: true positive rate
     - thresholds: 
     '''   
-    [FPR, TPR, thresholds] = roc_curve(y, predictions, drop_intermediate=False)
+    [FPR, TPR, thresholds] = roc_curve(np.ravel(y), np.ravel(predictions), drop_intermediate=False)
     
     return (FPR, TPR, thresholds)
     
@@ -80,7 +81,7 @@ def computeAUC(y, predictions):
     - predictions: N * 1 Numpy vector of binary values (0 and 1);
                    predicted classes
     '''
-    AUC = roc_auc_score(y, predictions)
+    AUC = roc_auc_score(np.ravel(y), np.ravel(predictions))
     
     return AUC
     
