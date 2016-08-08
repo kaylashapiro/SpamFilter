@@ -116,7 +116,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         sum_TPR += TPR
         sum_FPR += FPR
         sum_FNR += FNR
-        sum_TNR = TNR
+        sum_TNR += TNR
         
         
     error = sum_error/no_iterations # ADD DIVIDE BY ZERO EXCEPTION OR DO A CHECK SOMEWHERE ELSE FOR NO_ITERATIONS
