@@ -142,17 +142,21 @@ def computeClass(votes, ith_predictor):
 
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_X = pd.read_csv('../Datasets/EmailDataProcessed/Features.csv', header = None)
-    X = np.array(df_X)
-    print X
+    df_x = pd.read_csv('../Datasets/TrainData/X_train_1.csv', header = None)
+    x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/EmailDataProcessed/Labels.csv', header = None)
+    df_y = pd.read_csv('../Datasets/TrainData/y_train_1.csv', header = None)
     y = np.array(df_y)
-    print y
+   
+    df_x_test = pd.read_csv('../Datasets/TestData/X_test_1.csv', header = None)
+    x_test = np.array(df_x_test)
+    
+    df_y_test = pd.read_csv('../Datasets/TestData/y_test_1.csv', header = None)
+    y_test = np.array(df_y_test)
     
     no_predictors = 3
     
-    print bagPredictors(X, y, X, y, no_predictors)
+    print bagPredictors(x, y, x_test, y_test, no_predictors, classifier='naivebayes')
     
     
 # This is the standard boilerplate that calls the main() function.
