@@ -179,7 +179,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     y_test = np.array(df_y_test)
     
     [sum_errors, sum_TPRs, sum_FPRs, sum_FNRs, sum_TNRs, sum_AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
-                                                                                        perc_instances, perc_feature_subsampling, perc_label_switching)
+                                                                                        perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
     sum_errors = np.array([sum_errors])
     sum_TPRs = np.array([sum_TPRs])
     sum_FPRs = np.array([sum_FPRs])
@@ -207,7 +207,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
         y_test = np.array(df_test)
 
         [errors, TPRs, FPRs, FNRs, TNRs, AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
-                                                                    perc_instances, perc_feature_subsampling, perc_label_switching)
+                                                                    perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
         sum_errors = np.concatenate((sum_errors,np.array([errors])), axis=0)                                                     
         sum_TPRs = np.concatenate((sum_TPRs,np.array([TPRs])), axis=0)
         sum_FPRs = np.concatenate((sum_FPRs,np.array([FPRs])), axis=0)    
@@ -308,13 +308,13 @@ def main():
     no_predictors = 60
     
     #attacks = ['No', 'Dict', 'Empty']
-    attack='Empty' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
+    attack='No' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
     #classifiers = ['logisticReg', 'adaline']
     classifier = 'adaline' # Choose from 1) 'logisticReg', 2) 'adaline'
     
     # ATTACK PARAMETERS
-    #perc_poisoning = [0] # No Attack
-    perc_poisoning = [10, 20, 30] # Attack
+    perc_poisoning = [0] # No Attack
+    #perc_poisoning = [10, 20, 30] # Attack
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
@@ -324,7 +324,6 @@ def main():
     
     for perc in perc_poisoning:
         runTests(no_iterations, no_predictors, perc, bagging_samples, feature_subsampling, label_switching, attack, classifier)
-    
     
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
