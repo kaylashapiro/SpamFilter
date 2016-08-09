@@ -314,7 +314,7 @@ def main():
     
     # ATTACK PARAMETERS
     #perc_poisoning = [0] # No Attack
-    perc_poisoning = [10]
+    perc_poisoning = [20]
     #perc_poisoning = [10, 20, 30] # Attack
     
     # BAGGING PARAMETERS
