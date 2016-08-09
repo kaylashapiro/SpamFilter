@@ -37,6 +37,7 @@ def fit(features, labels,
         initial_weights=None,
         learning_rate=0.1,
         termination_condition=None,
+        max_epoch=100,
         threshold=1e-5,
         ham_label=0,
         spam_label=1,
@@ -59,10 +60,7 @@ def fit(features, labels,
     
     Output:
     - W: D * 1 Numpy vector of real values
-    '''   
-    if not termination_condition:
-        termination_condition = max_iters(100)
-        
+    '''           
     if (add_bias):
         features = addBias(features)
     
@@ -76,10 +74,10 @@ def fit(features, labels,
     W = np.zeros((D, 1)) if initial_weights is None else initial_weights.reshape((D, 1))
 
     ## 2. Evaluate the termination condition
-    epoch = 1
+    epoch = 0
     last_epoch_error = 1e6
 
-    while not termination_condition():
+    while epoch < max_epoch:
         ## current iteration classifier output
         O = np.dot(X, W)
 
@@ -106,14 +104,9 @@ def fit(features, labels,
         #current_cost = computeCost(Y, O)
         #cost.append(current_cost)
         
-        if (np.abs(last_epoch_error - current_error) < threshold):
-            break
-            
-        last_epoch_error = current_error
-
         #if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
         epoch += 1
-
+        
     return W
 
 
@@ -158,10 +151,10 @@ def predict(features, weights,
 def main():
     '''Test Adaline training'''
 
-    df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/EmptyAttackData/10_perc_poison/y_train_0.csv', header = None)
     y = np.array(df_y)   
    
     df_x_test = pd.read_csv('../Datasets/TestData/X_test_0.csv', header = None)
@@ -173,7 +166,6 @@ def main():
     ## train model
     weights = fit(features=x, labels=y)
         
-
     predictions = predict(x_test, weights)
     
     print computeError(y_test, predictions)
