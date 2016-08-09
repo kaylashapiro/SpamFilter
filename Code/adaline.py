@@ -38,7 +38,6 @@ def fit(features, labels,
         learning_rate=0.1,
         termination_condition=None,
         max_epoch=100,
-        threshold=1e-5,
         ham_label=0,
         spam_label=1,
         verbose=True,
@@ -75,7 +74,6 @@ def fit(features, labels,
 
     ## 2. Evaluate the termination condition
     epoch = 0
-    last_epoch_error = 1e6
 
     while epoch < max_epoch:
         ## current iteration classifier output
@@ -98,8 +96,8 @@ def fit(features, labels,
             T = np.ones(O.shape)
             T[O < 0] = -1
 
-        current_error = computeError(T, Y)
-        error.append(current_error)
+        #current_error = computeError(T, Y)
+        #error.append(current_error)
         
         #current_cost = computeCost(Y, O)
         #cost.append(current_cost)
