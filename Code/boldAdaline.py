@@ -129,7 +129,7 @@ def fit(features, labels,
             
         last_epoch_error = current_error
 
-        if verbose and (epoch%1 == 0): print('iteration %d:\tcost = %.3f \terror = %.3f' % (epoch, cost[-1], error[-1]))
+        #if verbose and (epoch%1 == 0): print('iteration %d:\tcost = %.3f \terror = %.3f' % (epoch, cost[-1], error[-1]))
        
     return W
 
