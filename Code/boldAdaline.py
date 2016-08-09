@@ -110,14 +110,14 @@ def fit(features, labels,
             current_error = computeError(T, Y)
             error.append(current_error)
             learning_rate = learning_rate*1.05
-            print 'LEARNING RATE INCREASED TO:', learning_rate
+            #print 'LEARNING RATE INCREASED TO:', learning_rate
         elif (current_error - last_epoch_error > 1e-8):
             learning_rate = learning_rate*.5
             W = last_W
             epoch -= 1
             current_error = 1e10
-            print 'LEARNING RATE DECREASED TO:', learning_rate
-            print 'UNDO ITERATION!!!!!!'
+            #print 'LEARNING RATE DECREASED TO:', learning_rate
+            #print 'UNDO ITERATION!!!!!!'
         else:
             current_error = computeError(T, Y)
             error.append(current_error)
