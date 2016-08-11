@@ -1,10 +1,16 @@
 # coding: utf-8
 
+import sys
+import importlib
 import pandas as pd
 import numpy as np
-import dictionaryAttack as attack
 
-def performAttack(frac_knowl=1, perc_poisoning=[10, 20, 30], no_iterations=10):
+def performAttack(frac_knowl=1, 
+                  perc_poisoning=[10, 20, 30], 
+                  no_iterations=10,
+                  attack=None,
+                  attack_folder=None,
+                  dataset=None):
     '''
     Performs attacks on no_iterations training sets at various poisoning levels
     and saves them to .csv files.
@@ -15,12 +21,23 @@ def performAttack(frac_knowl=1, perc_poisoning=[10, 20, 30], no_iterations=10):
     - perc_poisoning: default list of real numbers ranging from 0 to 100
     - no_iterations: Integer number of training sets to iterate through and attacks
                      to generate at each perc_poisoning
+    - attack: string; choose from 1) 'dictionaryAttack' 2) 'emptyAttack'
+    - attack_folder: string; choose from 1) 'DictAttackData' 2) 'EmptyAttackData'
+    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
     
     Output:
     NONE
     '''
-    path = '../Datasets/DictAttackData/'
-    path_train = '../Datasets/TrainDataProcessed/'
+    try:
+        attack = importlib.import_module(attack)
+    except ImportError as error:
+        print error
+        print "Failed to import attack module in performAttacks.py"
+        print "Available attack modules: 1) 'dictionaryAttack' 2) 'emptyAttack'"
+        sys.exit(0)
+        
+    path = '../Datasets/' + attack_folder + '/' + dataset + '/'
+    path_train = '../Datasets/TrainData/' + dataset + '/'
     
     for iter in xrange(no_iterations):    
         X_train_name = 'X_train_' + str(iter) + '.csv'
@@ -54,10 +71,7 @@ def performAttack(frac_knowl=1, perc_poisoning=[10, 20, 30], no_iterations=10):
     
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():    
-    
-    performAttack()
-    
-    
+    performAttack(attack='emptyAttack',attack_folder='EmptyAttackData',dataset='lingspam')
     
     
 # This is the standard boilerplate that calls the main() function.
