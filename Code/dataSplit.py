@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 import random
 
-def dataSplit(X, y, no_iterations=10):
+def dataSplit(X, y, no_iterations=10, dataset='enron'):
     '''
     Splits processed features and labels into different training and test sets
     for a certain number of iterations and saves them to .csv files
@@ -23,11 +23,12 @@ def dataSplit(X, y, no_iterations=10):
     '''
 
     rand_no = random.randint(0,1000) # Generate random state
-    path_train = '../Datasets/TrainDataProcessed/'
-    path_test = '../Datasets/TestDataProcessed/'
+    size = .5
+    path_train = '../Datasets/TrainData/' + dataset + '/'
+    path_test = '../Datasets/TestData/' + dataset + '/'
     
     for iter in xrange(no_iterations):
-        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=rand_no)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=size,random_state=rand_no)
         
         X_train_name = 'X_train_' + str(iter) + '.csv'
         X_test_name = 'X_test_' + str(iter) + '.csv'
@@ -50,15 +51,19 @@ def dataSplit(X, y, no_iterations=10):
     
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_X = pd.read_csv('../Datasets/EmailDataProcessed/Features.csv', header = None)
+    dataset = 'lingspam'
+    features_path = '../Datasets/EmailDataProcessed/' + dataset + '/Features.csv'
+    labels_path = '../Datasets/EmailDataProcessed/' + dataset + '/Labels.csv'
+
+    df_X = pd.read_csv(features_path, header = None)
     X = np.array(df_X)
     print X
     
-    df_y = pd.read_csv('../Datasets/EmailDataProcessed/Labels.csv', header = None)
+    df_y = pd.read_csv(labels_path, header = None)
     y = np.array(df_y)
     print y
     
-    dataSplit(X,y)
+    dataSplit(X,y,dataset=dataset)
     
     
 # This is the standard boilerplate that calls the main() function.
