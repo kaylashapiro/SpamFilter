@@ -10,6 +10,23 @@ Inject malicious points indicative of ham email.
 import numpy as np
 from sklearn.metrics import mutual_info_score
 
+def select_using_frequency(features, labels, threshold=0, ham_label=0):
+    '''
+    Returns indices of the most salient features for the ham class,
+    using the frequency the features appear in ham instances vs
+    spam instances.
+    '''
+    X, Y = features, np.ravel(labels)
+    N, D = X.shape
+    
+    ##calculate frequency of feature presence relative to each class
+    ham_freq  = np.mean(X[np.ravel(Y == ham_label)], axis=0)
+    spam_freq = np.mean(X[np.ravel(Y != ham_label)], axis=0)
+    
+    ##select indicies more frequent in ham
+    salient_indices = np.ravel(np.where(ham_freq - spam_freq > threshold))    
+    
+    return salient_indices
 
 def select_most_present(features, labels, threshold=0, ham_label=0):
     '''
@@ -71,8 +88,8 @@ def poisonData(features, labels,
         ## params
         percentage_samples_poisoned,
         percentage_features_poisoned=1.0,
-        feature_selection_method=select_using_MI,
-        threshold=0.01,
+        feature_selection_method=select_using_frequency,
+        threshold=.01,
         ham_label=0,
         ):
     '''
@@ -98,21 +115,28 @@ def poisonData(features, labels,
     spam_label = 1
     X, Y = features, labels
     N, D = X.shape ## number of N: samples, D: features
-    num_poisoned = int(N * percentage_samples_poisoned)
+  
+    num_poisoned = int(round(N * percentage_samples_poisoned))
+    d = int(round(D * percentage_features_poisoned))
 
     ## find the most salient features, indicative of the ham class
-    salient_indices = feature_selection_method(X, Y, threshold)
-    print salient_indices
+    salient_indices = feature_selection_method(X, Y)
+    #print salient_indices
 
+    no_salient_indices = len(salient_indices)
+    
+    if (no_salient_indices > d):
+        salient_indices = np.random.choice(salient_indices, d, replace=False)
+        
     ## randomly replace some samples with the poisoned ones
     ## so that total number of samples doesn't change
     poisoned_indices = np.random.choice(N, num_poisoned,replace=False)
-    print poisoned_indices    
+    #print poisoned_indices    
 
     X[poisoned_indices] = 0
 
     ## "turn on" features whose presence is indicative of ham
-    X[np.ix_(poisoned_indices,salient_indices)] = 1
+    X[np.ix_(poisoned_indices, salient_indices)] = 1
 
     ## the contamination assumption
     Y[poisoned_indices] = spam_label
