@@ -10,86 +10,102 @@ Assumes no bias has been added yet.
 
 import numpy as np
 import random
-import pandas as pd
 
-def generateAttackData(no_mal_instances, no_features, no_mal_features):
+def vary_attack_points(no_poisoned, D, d, threshold):
     '''
-    Returns crafted attack instances.
+    Returns crafted attack instances. Generates varying attack points based
+    on a fraction of the attacker's full feature knowledge.
     
-    Inputs:
-    - no_mal_instances: number of poison data examples
-    - no_features: the number of features for each example
-    - no_mal_features: the number of features the attacker knows about
+    Input:
+    - no_poisoned: number of poison data examples
+    - D: the number of features for each example
+    - d: the number of features the attacker knows about
+    - threshold: float between 0 and 1
+                 fraction of known features the attacker uses in point generation; randomness
     
-    Output: 
-    - mal_data: no_mal_instances * no_features Numpy matrix of poison examples
-    
-    EXTENSION: Implement more sophisticated attacker knowledge rather than random
-    EXTENSION: Implement attack with different data points
+    Output:
+    - attack_points: no_poisoned * D Numpy matrix of poison examples
     '''
+    ## Attacker can choose whether or not to use their feature knowledge
+    no_poisoned_features = int(round(threshold * d))
     
-    rand_features = np.array([0] * (no_features - no_mal_features) + [1] * no_mal_features)
+    ## Generate no_poisoned different attack instances
+    rand_features = np.array([0] * (D - no_poisoned_features) + [1] * no_poisoned_features)
     np.random.shuffle(rand_features)
     
-    mal_data = np.array([rand_features,] * no_mal_instances)
+    attack_points = [rand_features]
     
-    return mal_data
+    for instance in xrange(1, no_poisoned):
+        np.random.shuffle(rand_features)
+        attack_points = np.vstack((attack_points, [rand_features]))
+        
+    return attack_points
     
 
-def poisonData(X, y, frac_knowl, frac_mal_instances):
+def simple(no_poisoned, D, d, **kwargs):
+    '''
+    Returns crafted attack instances. Takes advantage of the attacker's
+    full feature knowledge and generates copies of the same attack point.
+    
+    Input:
+    - no_poisoned: number of poison data examples
+    - D: the number of features for each example
+    - d: the number of features the attacker knows about
+    
+    Output: 
+    - attack_points: no_poisoned * D Numpy matrix of poison examples
+    '''
+    ## Generate attack point mimicking attacker knowledge
+    rand_features = np.array([0] * (D - d) + [1] * d)
+    np.random.shuffle(rand_features)
+    
+    attack_points = np.array([rand_features,] * no_poisoned)
+    
+    return attack_points
+    
+
+def poisonData(features, labels, 
+               ## params
+               percentage_samples_poisoned,
+               percentage_features_poisoned=1.0,
+               generate_attack_data=simple,
+               threshold=1.0,
+               ham_label=0,
+               ):
     '''
     Returns the input data with *added* data that is crafted specifically to cause
     a poisoning dictionary attack, where all features (within attacker knowledge)
     are set to 1. 
     
-    Inputs:
-    - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
-        with no_instances: the number of training examples
-        and  no_features: the number of features for each example
-    - y: no_instances * 1 Numpy vector of binary values (0 and 1)
-    - frac_knowl: float between 0 and 1
-                  percentage of knowledge the attacker has of the feature set
-    - frac_mal_instances: float between 0 and 1
-                          percentage of the dataset under the attacker's control
+    Input:
+    - features: N * D Numpy matrix of binary feature values (0 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
+    - percentage_samples_poisoned: float between 0 and 1 
+                                   fraction of the dataset under the attacker's control
+    - percentage_features_poisoned: float between 0 and 1
+                                    fraction of knowledge the attacker has of the feature set
+    - threshold: float between 0 and 1
+                 fraction of known features the attacker uses in point generation; randomness
     
-    Outputs:
+    Output:
     - X: poisoned features
-    - y: poisoned labels    
+    - Y: poisoned labels    
     '''
+    ## notation
+    X, Y = features, labels
+    N, D = X.shape
     
-    no_instances, no_features = X.shape
-    
-    no_mal_features = int(round(frac_knowl * no_features))
-    no_mal_instances = int(round(frac_mal_instances * no_instances))
+    no_poisoned = int(round(percentage_samples_poisoned * N))
+    d = int(round(percentage_features_poisoned * D))
         
-    mal_data = generateAttackData(no_mal_instances, no_features, no_mal_features)
+    attack_points = generate_attack_data(no_poisoned, D, d, threshold)
     
-    indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
+    poisoned_indices = np.random.choice(N, no_poisoned, replace=False)
         
-    X[indices] = mal_data
-    y[indices] = 1 # Contamination Assumption
+    X[poisoned_indices] = attack_points
+    Y[poisoned_indices] = 1 # Contamination Assumption
     
-    return (X, y)
+    return (X, Y)
     
-
-
-# Main function to test the dictionary attack
-def main():
-    df_X = pd.read_csv('test.csv', header = None)
-    X = np.array(df_X)
-    print X
-    
-    df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y)
-    print y
-    
-    frac_knowl = .5
-    frac_mal_instances = 1.0/3
-    
-    print poisonData(X, y, frac_knowl, frac_mal_instances)
-    
-    
-
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()
