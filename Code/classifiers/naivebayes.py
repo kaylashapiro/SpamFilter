@@ -4,13 +4,14 @@
 Adapted from: https://github.com/galvanic/adversarialML/blob/master/classifiers/naivebayes.py
 
 Inspired by Luis Munoz's MATLAB code for the Naive Bayes classifier model.
-/!\ run with python3
 '''
+import sys
 import numpy as np
 import pandas as pd
-from metrics import computeError
-from metrics import computeMetrics
 from sklearn.naive_bayes import BernoulliNB
+
+sys.path.insert(0, '../helpers')
+from metrics import computeError, computeMetrics
 
 def process_parameters(p, tolerance=1e-10):
     '''
@@ -45,7 +46,7 @@ def fit(features, labels,
     - parameters
     '''
     ## setup
-    X, Y = features, labels
+    X, Y = features, np.ravel(labels)
     N, D = X.shape    ## number of N: training samples, D: features
     tolerance = 1e-30 ## tolerance factor (to avoid under/overflows)
 
@@ -113,32 +114,25 @@ def predict(features, parameters,
 def main():
     '''Test NaiveBayes training'''
 
-    df_x = pd.read_csv('../Datasets/TrainData/lingspam/X_train_1.csv', header = None)
+    df_x = pd.read_csv('../../Datasets/TrainData/lingspam/X_train_1.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/lingspam/y_train_1.csv', header = None)
+    df_y = pd.read_csv('../../Datasets/TrainData/lingspam/y_train_1.csv', header = None)
     y = np.array(df_y)
    
-    df_x_test = pd.read_csv('../Datasets/TestData/lingspam/X_test_1.csv', header = None)
+    df_x_test = pd.read_csv('../../Datasets/TestData/lingspam/X_test_1.csv', header = None)
     x_test = np.array(df_x_test)
     
-    df_y_test = pd.read_csv('../Datasets/TestData/lingspam/y_test_1.csv', header = None)
+    df_y_test = pd.read_csv('../../Datasets/TestData/lingspam/y_test_1.csv', header = None)
     y_test = np.array(df_y_test)
    
     ## train model
-    weights = fit(x, np.ravel(y))        
+    weights = fit(x, y)        
 
     predictions = predict(x_test, weights)
     
     print computeError(y_test, predictions)
-    print 'MY METRICS:', computeMetrics(y_test, predictions)
     
-    classifier = BernoulliNB()
-    classifier.fit(x, np.ravel(y))
-    pred = classifier.predict(x_test)
-    
-    print computeError(y_test, pred)
-    print computeMetrics(y_test, pred)
     return
 
 if __name__ == '__main__':
