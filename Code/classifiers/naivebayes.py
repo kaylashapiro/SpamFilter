@@ -31,17 +31,20 @@ def fit(features, labels,
         ## params
         ham_label=0,
         spam_label=1,
+        **kwargs,
         ):
     '''
     Returns the parameters for a Naive Bayes model
+    
     Logs are used because otherwise multiplications of very small numbers,
     which leads to problems of over/underflows
-    TRAINING PHASE
+        
     Inputs:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
+                with N: the number of training examples
+                and  D: the number of features for each example
     - labels:   N * 1 Numpy vector of binary values (0 and 1)
+    
     Outputs:
     - parameters
     '''
@@ -76,10 +79,10 @@ def predict(features, parameters,
         spam_label=1,
         ):
     '''
-    TEST PHASE
     Inputs:
     - parameters: model parameters
     - features
+    
     Outputs:
     - predicted: labels
     '''
