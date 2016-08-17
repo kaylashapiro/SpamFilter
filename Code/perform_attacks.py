@@ -5,6 +5,8 @@ import importlib
 import pandas as pd
 import numpy as np
 
+sys.path.insert(0, 'attacks')
+
 def performAttack(frac_knowl=1, 
                   perc_poisoning=[10, 20, 30], 
                   no_iterations=10,
@@ -50,10 +52,12 @@ def performAttack(frac_knowl=1,
         y_train = np.array(df_y_train)
         
         for perc in perc_poisoning:
+            print 'ATTACK', iter
+            print 'POISONING', perc
             folder = str(perc) + '_perc_poison/'
             perc = float(perc)/100
             
-            [X_train_poisoned, y_train_poisoned] = attack.poisonData(X_train, y_train, frac_knowl, perc)
+            [X_train_poisoned, y_train_poisoned] = attack.poisonData(X_train, y_train, perc, frac_knowl)
             
             X_name = 'X_train_' + str(iter) + '.csv'
             y_name = 'y_train_' + str(iter) + '.csv'
@@ -71,7 +75,7 @@ def performAttack(frac_knowl=1,
     
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():    
-    performAttack(attack='emptyAttack',attack_folder='EmptyAttackData',dataset='lingspam')
+    performAttack(attack='empty',attack_folder='EmptyAttackData',dataset='lingspam')
     
     
 # This is the standard boilerplate that calls the main() function.
