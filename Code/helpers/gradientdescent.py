@@ -5,13 +5,24 @@ Adapted from: https://github.com/galvanic/adversarialML/blob/master/helpers/grad
 '''
 
 import numpy as np
-import sys
 from collections import deque
 from math import ceil
 from metrics import computeError
 
 def get_batch(X, Y, permuted_indices, batch_number, batch_size):
     '''
+    Input:
+    - X: N * D Numpy matrix of binary values (0 and 1
+         with N: the number of training examples
+         and  D: the number of features for each example
+    - Y: N * 1 Numpy vector of binary values (0 and 1)
+    - permuted_indices: sample indices mixed
+    - batch_number: int
+    - batch_size: int, > 0, <= N
+    
+    Output:
+    - x: feature batch
+    - y: label batch
     '''
     N = X.shape[0]
     
@@ -44,6 +55,33 @@ def gradient_descent(features, labels,
                      adaptive_learning_rate=False
                      ):
     '''
+    Returns the optimal weights for a given training set and a given model 
+    using the gradient descent method. The model is determined by the 
+    'calculate_output', 'cost_function' and 'predict' functions.
+    
+    /!\ Assumes bias term is already in the features input.
+    
+    Input:
+    - features: N * D Numpy matrix of binary values (0 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
+    - batch_size: int between 1 and N
+                    1 = stochastic gradient descent
+                    N = batch gradient descent
+                    everything in between = mini-batch gradient descent
+    - learning_rate: float, between 0 and 1
+    - max_epochs: int, >= 0; maximum number of times to run through training set
+    - initial_weights: D * 1 Numpy vector of feature weights
+    - convergence_threshold: float, very small number; e.g. 1e-5
+    - convergence_look_back: int, >= 1
+                             stops if the error difference hasn't been over threshold
+                             for the last X epochs.
+    
+    Output:
+    - W: D * 1 Numpy vector of real values
+    
+    TODO adaptive learning rate
     '''    
     ## notation
     X, Y = features, labels
@@ -94,38 +132,3 @@ def gradient_descent(features, labels,
         epoch += 1
         
     return W
-    
-def main():
-    x = np.array([[1, 0, 1],		
-        [0, 0, 0],		
-        [1, 0, 1],		
-        [1, 1, 1],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [0, 1, 0]],		
-        dtype=np.int8)		
-    print x
-    y = np.array([[1],		
-        [1],		
-        [1],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [1]],		
-        dtype=np.int8) 
-    print y
-
-    N = x.shape[0]
-    permuted_indices = np.random.permutation(N)
-    print permuted_indices
-    print get_batch(x, y, permuted_indices, 3, 3)
-
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()
