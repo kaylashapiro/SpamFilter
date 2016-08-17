@@ -113,7 +113,6 @@ def predict(features, weights,
         ## params
         ham_label=0,
         spam_label=1,
-        add_bias = True
         ):
     '''
     Input:
@@ -122,11 +121,11 @@ def predict(features, weights,
         and  D: the number of features for each example
     - weights: D * 1 Numpy vector of real values
     
+    /!\ Assumes bias term is already in the features input.
+    
     Output:
     - T: N * 1 Numpy vector of binary prediction values
     '''
-    if (add_bias):
-        features = addBias(features)
     
     ## notation
     X, W = features, weights
