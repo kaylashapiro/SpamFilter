@@ -31,7 +31,7 @@ def fit(features, labels,
         ## params
         ham_label=0,
         spam_label=1,
-        **kwargs,
+        **kwargs
         ):
     '''
     Returns the parameters for a Naive Bayes model
