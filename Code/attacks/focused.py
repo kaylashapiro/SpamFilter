@@ -12,26 +12,29 @@ import numpy as np
 import random
 import pandas as pd
 
-def selectHamIndex(y):
+def select_ham_index(labels):
     '''
     Returns the index of a random ham email in the training set.
     
     Inputs:
-    - y: 1 * no_instances Numpy vector of binary values (0 and 1) 
-         with no_instances: the number of training examples
+    - labels: 1 * no_instances Numpy vector of binary values (0 and 1) 
+        with no_instances: the number of training examples
     
     Output: 
-    - ham_email: index of random ham email in the training set
+    - ham_index: index of random ham email in the training set
     '''
+    Y = labels
     
-    ham_index = [i for i in range(len(y)) if y[i] == 0]
+    ## Find all the instances of ham
+    ham_indices = [i for i in range(len(Y)) if Y[i] == 0]
     
-    ham_email = np.random.choice(ham_index, 1)
+    ## Select a random ham index
+    ham_index = np.random.choice(ham_indices, 1)
     
-    return ham_email
+    return ham_index
 
     
-def generateAttackData(ham_email, features_present, no_mal_instances, no_features, no_mal_features):   
+def generateAttackData(ham_email, features_present, no_poisoned, d, no_poisoned_features):   
     '''
     Returns crafted attack instances.
     
@@ -39,86 +42,119 @@ def generateAttackData(ham_email, features_present, no_mal_instances, no_feature
     - ham_email: 1 * no_features Numpy vector with features corresponding to one random
                  ham email from the training set.
     - features_present: list of indices where feature value in ham_email is set to 1
-    - no_mal_instances: number of poison data examples
-    - no_features: the number of features for each example
-    - no_mal_features: the number of features the attacker knows about
+    - no_poisoned: number of poison data examples
+    - d: the number of features to "turn on" for each example
+    - no_poisoned_features: the number of features the attacker knows about
     
     Output: 
-    - mal_data: no_mal_instances * no_features Numpy matrix of poison examples
+    - attack_points: no_poisoned * no_features Numpy matrix of poison examples
     
     EXTENSION: Implement more sophisticated attacker knowledge rather than random
     EXTENSION: Implement attack with different (varied) data points
     '''
     
-    rand_features = np.array([0] * (no_features - no_mal_features) + [1] * no_mal_features)
+    rand_features = np.array([0] * (d - no_poisoned_features) + [1] * no_poisoned_features)
     np.random.shuffle(rand_features)
     
-    mal_ham = np.array(ham_email)
+    attack_point = np.array(ham_email)
     
-    mal_ham[features_present] = rand_features
+    attack_point[features_present] = rand_features
   
-    mal_data = np.array([mal_ham,] * no_mal_instances)
+    attack_points = np.array([attack_point,] * no_poisoned)
       
-    return mal_data
+    return attack_points
     
     
-def poisonData(X, y, frac_knowl, frac_mal_instances):
+def poisonData(features, labels, 
+               ## params
+               percentage_samples_poisoned,
+               percentage_features_poisoned=1.0,
+               feature_selection_method=None,
+               threshold=.1,
+               ham_email=None,
+               ham_index=None,
+               ham_label=0,
+               spam_label=1,
+               ):
     '''
     Returns the input data with *added* data that is crafted specifically to cause
     a poisoning focused attack, where all features (within attacker knowledge)
     corresponding to a specific ham email are set to 1 and marked as spam. 
     
     Inputs:
-    - X: no_instances * no_features Numpy matrix of binary feature values (0 and 1)
-         with no_instances: the number of training examples
-         and  no_features: the number of features for each example
-    - y: 1 * no_instances Numpy vector of binary values (0 and 1)
-    - frac_knowl: float between 0 and 1
-                  percentage of knowledge the attacker has of the feature set
-    - frac_mal_instances: float between 0 and 1
-                          percentage of the dataset under the attacker's control
+    - features: N * D Numpy matrix of binary feature values (0 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
+    - percentage_samples_poisoned: float between 0 and 1
+                percentage of the dataset under the attacker's control
+    - percentage_features_poisoned: float between 0 and 1
+                percentage of knowledge the attacker has of the feature set
+    - feature_selection_method: string
+    - threshold: percentile of features to keep
     
     Outputs:
     - X: poisoned features
-    - y: poisoned labels    
+    - Y: poisoned labels    
     '''
+    ## notation
+    X, Y = features, labels
+    N, D = X.shape
     
-    ham_email = np.array(X[selectHamIndex(y)][0])
+    if not ham_email:      
+        if not ham_index:
+            ## select a random ham instance from the training set
+            ham_index = select_ham_index(Y)
     
+        ham_email = np.array(X[ham_index][0])
+    
+    ## find the indices of features that are "turned on" in the ham instance
     features_present = [i for i in range(len(ham_email)) if ham_email[i] == 1]
     
-    no_features = len(features_present)
+    ## number of features "turned on"
+    d = len(features_present)
 
-    no_instances = X.shape[0]
+    ## number of features to poison
+    no_poisoned_features = int(round(percentage_features_poisoned * d))
     
-    no_mal_features = int(round(frac_knowl * no_features))
-    no_mal_instances = int(round(frac_mal_instances * no_instances))
+    ## number of attack points to inject
+    no_poisoned = int(round(percentage_samples_poisoned * N))
         
-    mal_data = generateAttackData(ham_email, features_present, no_mal_instances, no_features, no_mal_features)
+    attack_points = generateAttackData(ham_email, features_present, no_poisoned, d, no_poisoned_features)
     
-    indices = np.random.choice(X.shape[0], no_mal_instances, replace=False)
+    poisoned_indices = np.random.choice(N, no_poisoned, replace=False)
     
-    X[indices] = mal_data
-    y[indices] = 1
+    X[poisoned_indices] = attack_points
+    Y[poisoned_indices] = spam_label
     
-    return (X, y)
+    return (X, Y)
     
-
-# Main function to run the dictionary attack
+# Main function to test the ham attack
 def main():
-    df_X = pd.read_csv('test.csv', header = None)
-    X = np.array(df_X)
-    print X
-    
-    df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y)
-    print y
-    
-    frac_knowl = .5
-    frac_mal_instances = 1.0/3
-    
-    print poisonData(X, y, frac_knowl, frac_mal_instances)
-    
+    x = np.array([[1, 0, 1],		
+        [0, 0, 0],		
+        [1, 0, 1],		
+        [1, 1, 1],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [1, 1, 0],		
+        [0, 1, 0]],		
+        dtype=np.int8)		
+    y = np.array([[1],		
+        [1],		
+        [1],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [0],		
+        [1]],		
+        dtype=np.int8) #* 2 - 1		
+
+    print poisonData(x,y,.3)
 
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':

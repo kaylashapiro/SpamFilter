@@ -6,8 +6,11 @@ Adapted from: https://github.com/galvanic/adversarialML/blob/master/attacks/ham.
 Implementation of a ham attack.
 
 Inject malicious points indicative of ham email.
+
+Assumes no bias has been added yet.
 '''
 import numpy as np
+import pandas as pd
 from sklearn.metrics import mutual_info_score
 
 def select_using_frequency(features, labels, threshold=0, ham_label=0):
@@ -45,7 +48,7 @@ def select_most_present(features, labels, threshold=0, ham_label=0):
     return salient_indices
 
 
-def select_using_MI(features, labels, threshold=0.01, ham_label=0):
+def select_using_MI(features, labels, threshold=0.1, ham_label=0):
     '''
     Returns indices of the most salient features for the ham class, using a
     mutual information score between feature values and class label, and
@@ -85,13 +88,14 @@ def select_using_MI(features, labels, threshold=0.01, ham_label=0):
 
 
 def poisonData(features, labels,
-        ## params
-        percentage_samples_poisoned,
-        percentage_features_poisoned=1.0,
-        feature_selection_method=select_using_frequency,
-        threshold=.01,
-        ham_label=0,
-        ):
+               ## params
+               percentage_samples_poisoned,
+               percentage_features_poisoned=1.0,
+               feature_selection_method=select_using_MI,
+               threshold=.1,
+               ham_label=0,
+               spam_label=1,
+               ):
     '''
     Returns the input data with *replaced* data that is crafted specifically to
     cause a poisoning ham attack, where features of the contaminating emails
@@ -112,7 +116,6 @@ def poisonData(features, labels,
     - Y: N * 1 poisoned labels
     '''
     ## notations
-    spam_label = 1
     X, Y = features, labels
     N, D = X.shape ## number of N: samples, D: features
   
@@ -168,7 +171,7 @@ def main():
         [1]],		
         dtype=np.int8) #* 2 - 1		
 
-    print poisonData(x,y,.3)
+    print poisonData(x,y,.1)
 
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
