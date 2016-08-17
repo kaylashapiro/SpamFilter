@@ -121,35 +121,4 @@ def predict(X, W):
     predictions = np.zeros((X.shape[0],1))   
     predictions[probs>0.5] = 1
     
-    return predictions
-    
-    
-def main():
-
-    df_x = pd.read_csv('../../Datasets/TrainData/enron/X_train_1.csv', header = None)
-    x = addBias(np.array(df_x))
-    #print x
-    
-    df_y = pd.read_csv('../../Datasets/TrainData/enron/y_train_1.csv', header = None)
-    y = np.array(df_y)
-    #print y   
-    
-    df_x_test = pd.read_csv('../../Datasets/TestData/enron/X_test_0.csv', header = None)
-    x_test = addBias(np.array(df_x_test))
-    
-    df_y_test = pd.read_csv('../../Datasets/TestData/enron/y_test_0.csv', header = None)
-    y_test = np.array(df_y_test)
-    
-    w = fit(x,y)
-    
-    
-    pred = predict(x_test,w)
-    print computeError(y_test,pred)
-    
-    return
-    
-
-if __name__ == '__main__':
-    main()
-
-    
+    return predictions   
