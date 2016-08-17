@@ -1,13 +1,18 @@
 # coding: utf-8
 
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier as weak_learner
 from sklearn.ensemble import AdaBoostClassifier
-from metrics import computeError
-from helpers import addBias
 
-def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False):
+sys.path.insert(0, '../classifiers')
+sys.path.insert(0, '../helpers')
+
+import metrics as met
+from add_bias import addBias
+
+def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False, classifier='DecisionTree'):
     '''
     One iteration of the Adaboost algorithm to build a classifier.
     
@@ -64,7 +69,7 @@ def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False):
     
     return classifier, new_sample_weight, alpha, terminate
 
-def fit(X, y, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
+def fit(X, y, X_test, y_test, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
     '''
     AdaBoost classifier training.
     
@@ -87,6 +92,12 @@ def fit(X, y, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
     N = X.shape[0]
     classifiers = []
     alphas = []
+    errors = []
+    TPRs = []
+    FPRs = []
+    FNRs = []
+    TNRs = []
+    AUCs = []
     
     # 0. Initialize uniform weights
     sample_weight = np.array([float(1)/N,] * N)
@@ -96,11 +107,26 @@ def fit(X, y, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
         classifier, sample_weight, alpha, terminate = boost(X, y, sample_weight)
         classifiers.append(classifier)
         alphas.append(alpha)
+        
+        predictions = predict(X_test, classifiers, alphas)
+        
+        errors.append(met.computeError(y_test, predictions))
+        
+        AUCs.append(met.computeAUC(y_test, predictions))
+        
+        [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
+        
+        [TPR, FPR, FNR, TNR] = met.computeRates(TP, FP, FN, TN)
+        
+        TPRs.append(TPR)
+        FPRs.append(FPR)
+        FNRs.append(FNR)
+        TNRs.append(TNR)
                 
         if terminate:
-            return classifiers, alphas
+            return (classifiers, alphas, errors, TPRs, FPRs, FNRs, TNRs, AUCs)
     
-    return classifiers, alphas
+    return (classifiers, alphas, errors, TPRs, FPRs, FNRs, TNRs, AUCs)
     
 def predict(X, classifiers, alphas):
     '''
@@ -136,13 +162,13 @@ def predict(X, classifiers, alphas):
 def main():
 
     
-    df_x = pd.read_csv('../Datasets/TrainData/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../../Datasets/TrainData/enron/X_train_0.csv', header = None)
     x = np.array(df_x)
     print x
     
     x = addBias(x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../../Datasets/TrainData/enron/y_train_0.csv', header = None)
     y = np.array(df_y)
     print y   
     
@@ -178,23 +204,29 @@ def main():
     classifier = weak_learner(max_depth=5)
     classifier.fit(x, y)
     predictions = classifier.predict(x)
-    print 'BASE CLASSIFIER ERROR:', computeError(np.ravel(y), predictions)
+    print 'BASE CLASSIFIER ERROR:', met.computeError(y, predictions)
     
     
-    classifiers, alphas = fit(x,y)
+    classifiers, alphas, errors, TPRs, FPRs, FNRs, TNRs, AUCs = fit(x,y,x,y,no_predictors=3)
     print 'Final Classifier:', classifiers[-1] 
     
     predictions = predict(x, classifiers, alphas)
     print 'Final Predictions:', predictions
     
-    error = computeError(np.ravel(y), predictions)
+    print 'Errors:', errors
+    print 'TPRs:', TPRs
+    print 'FPRs:', FPRs
+    print 'FNRs:', FNRs
+    print 'TNRs:', TNRs
+    
+    error = met.computeError(y, predictions)
     print 'Final Error:', error
     
     classifier = AdaBoostClassifier(n_estimators=50, learning_rate=.1)
     classifier.fit(x,np.ravel(y))
     pred = classifier.predict(x)
     print pred
-    err = computeError(np.ravel(y), pred)
+    err = met.computeError(y, pred)
     print 'SKLEARN ERROR:', err
     
     return

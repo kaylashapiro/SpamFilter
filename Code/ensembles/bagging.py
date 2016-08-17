@@ -15,11 +15,15 @@ import numpy as np
 import random
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.cross_validation import train_test_split
+
+sys.path.insert(0, '../classifiers')
+sys.path.insert(0, '../helpers')
+
 import metrics as met
 import sampleWithReplacement as swr
 import featureSubsampling as fs
 import labelSwitching as ls
-from sklearn.cross_validation import train_test_split
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                   perc_instances=1, perc_feature_subsampling=1, perc_label_switching=0,
@@ -52,6 +56,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     - errors: 1 * no_predictors array listing the error at each bagging iteration 
               (i.e. after each predictor is added to the bag)
     '''
+    ## import classifier module
     try:
         classifier = importlib.import_module(classifier)
     except ImportError as error:
@@ -60,16 +65,21 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
         print "Available modules: 1) 'logisticReg' 2) 'adaline'"
         sys.exit(0)
     
+    ## initialize metrics to keep track of
     errors = []
     TPRs = []
     FPRs = []
     FNRs = []
     TNRs = []
     AUCs = []
+    
+    ## implement feature subsampling and label switching
     if (perc_feature_subsampling != 1):
         X_train, X_test = fs.featureSubsampling(X_train, X_test, perc_feature_subsampling)
     if (perc_label_switching != 0):
         y_train = ls.labelSwitching(y_train, perc_label_switching)
+    
+    ## generate bootstrap replicate
     replicate, labels = swr.generateReplicate(X_train, y_train, perc_instances)
     
     classifier_weights = classifier.fit(replicate, labels)     
@@ -142,21 +152,21 @@ def computeClass(votes, ith_predictor):
 
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_x = pd.read_csv('../Datasets/TrainData/X_train_1.csv', header = None)
+    df_x = pd.read_csv('../../Datasets/TrainData/enron/X_train_1.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/y_train_1.csv', header = None)
+    df_y = pd.read_csv('../../Datasets/TrainData/enron/y_train_1.csv', header = None)
     y = np.array(df_y)
    
-    df_x_test = pd.read_csv('../Datasets/TestData/X_test_1.csv', header = None)
+    df_x_test = pd.read_csv('../../Datasets/TestData/enron/X_test_1.csv', header = None)
     x_test = np.array(df_x_test)
     
-    df_y_test = pd.read_csv('../Datasets/TestData/y_test_1.csv', header = None)
+    df_y_test = pd.read_csv('../../Datasets/TestData/enron/y_test_1.csv', header = None)
     y_test = np.array(df_y_test)
     
     no_predictors = 3
     
-    print bagPredictors(x, y, x_test, y_test, no_predictors, classifier='naivebayes')
+    print bagPredictors(x, y, x_test, y_test, no_predictors, classifier='logistic_regression')
     
     
 # This is the standard boilerplate that calls the main() function.
