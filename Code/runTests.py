@@ -1,15 +1,23 @@
 # coding: utf-8
 
+import sys
 import importlib
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, 'classifiers')
+sys.path.insert(0, 'helpers')
+sys.path.insert(0, 'ensembles')
+
 import metrics as met
 import bagging as bag
+from add_bias import addBias
 
 def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feature_subsampling, label_switching, 
-             attack = 'Dict', 
-             classifier = 'logisticReg'):
+             attack='Dict', 
+             classifier='logistic_regression',
+             dataset=None):
     '''
     Inputs:
     - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
@@ -23,10 +31,18 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
     - label_switching: real number between 0 and 1; fraction of labels to switch
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
     
     Ouput:
     NONE
     '''
+    
+    if no_iterations <= 0:
+        print 'Need at least 1 experiment iteration.'
+        sys.exit(0)
+    if no_predictors <= 0:
+        print 'Need at least 1 predictor to run experiment.'
+        sys.exit(0)
     
     folder_paths = {
         'No': '../Datasets/TrainData/',
@@ -34,30 +50,31 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
         'Empty': '../Datasets/EmptyAttackData/',
     }
     
-    train_folder = folder_paths[attack]
+    train_folder = folder_paths[attack] + dataset + '/'
     
-    test_folder = '../Datasets/TestData/'          
+    test_folder = '../Datasets/TestData/' + dataset + '/'          
 
     if (perc_poisoning != 0):
         data_folder = str(perc_poisoning) + '_perc_poison/'
     else:
         data_folder = ''
 
-    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier, dataset=dataset)
     
     # Plain Old Bagging without feature subsampling or label switching
-    print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+    print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier, dataset=dataset)
     
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
-                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier)
+                print trainBaggedClassifier(no_iterations, no_predictors, perc_bag, perc_feat, perc_label, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier, dataset=dataset)
     return
     
             
 def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, 
                         attack='Dict', 
-                        classifier='logisticReg'):
+                        classifier='logistic_regression',
+                        dataset=None):
     '''
     Inputs:
     - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
@@ -68,6 +85,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
     - data_folder: string; folder for a given percentage of poisoning; empty for 'NoAttack'
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
     
     Ouput:
     - error: error value
@@ -106,9 +124,14 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         
         df_test = pd.read_csv(test_folder + y_test_file, header = None)
         y_test = np.array(df_test)
+        
+        if classifier is not 'naivebayes':
+            X_train = addBias(X_train)
+            X_test = addBias(X_test)
     
         weights = learner.fit(X_train, y_train)
         predictions = learner.predict(X_test, weights)
+        
         sum_error += met.computeError(y_test, predictions)
         sum_AUC += met.computeAUC(y_test, predictions)
         [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
@@ -127,13 +150,14 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
     AUC = sum_AUC/no_iterations
     
     # Arguments 0,0,0 signal base classifier
-    saveToFile(0,0,0,perc_poisoning,error,TPR,FPR,FNR,TNR,AUC,attack,classifier)
+    saveToFile(0,0,0,perc_poisoning,error,TPR,FPR,FNR,TNR,AUC,attack,classifier,dataset=dataset)
     
     return (error, TPR, FPR, FNR, TNR, AUC)
 
 def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, train_folder, test_folder, data_folder,
                           attack='Dict', 
-                          classifier = 'logisticReg'):
+                          classifier = 'logisticReg',
+                          dataset=None):
     '''
     Inputs:
     - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
@@ -150,6 +174,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     - data_folder: string; folder for a given percentage of poisoning; empty for 'NoAttack'
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
     
     Ouputs:
     - errors: 1 * N Numpy array of error values
@@ -178,6 +203,10 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     df_y_test = pd.read_csv(test_folder + y_test_file, header = None)
     y_test = np.array(df_y_test)
     
+    if classifier is not 'naivebayes':
+        X_train = addBias(X_train)
+        X_test = addBias(X_test)
+    
     [sum_errors, sum_TPRs, sum_FPRs, sum_FNRs, sum_TNRs, sum_AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                                                                                         perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
     sum_errors = np.array([sum_errors])
@@ -205,6 +234,11 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
         
         df_test = pd.read_csv(test_folder + y_test_file, header = None)
         y_test = np.array(df_test)
+        
+        if classifier is not 'naivebayes':
+            X_train = addBias(X_train)
+            X_test = addBias(X_test)
+        
 
         [errors, TPRs, FPRs, FNRs, TNRs, AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                                                                     perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
@@ -226,13 +260,14 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     
     #print errors
       
-    saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,AUCs,attack,classifier)
+    saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,AUCs,attack,classifier,dataset=dataset)
     
     return (errors, TPRs, FPRs, FNRs, TNRs, AUCs)
         
 def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, perc_poisoning, errors, TPRs, FPRs, FNRs, TNRs, AUCs, 
                 attack='Dict', 
-                classifier = 'logisticReg'):
+                classifier = 'logistic_regression',
+                dataset=None):
     '''
     Inputs:
     - perc_instances: real number fraction of the training set to put into a bootstrap replicate set; .5 = 50% of 
@@ -250,22 +285,23 @@ def saveToFile(perc_instances, perc_feature_subsampling, perc_label_switching, p
     - AUCs: 1 * N Numpy array of AUC values (see sklearn.metrics.roc_auc_score documentation)
     - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
     - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
+    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
     
     Ouput:
     NONE
-    '''            
-    
+    '''              
     test_results = concatenateResults(errors, TPRs, FPRs, FNRs, TNRs, AUCs)            
                 
     results_folder = '../Results/'
     attack_folder = '/' + attack + 'Attack/'
+    dataset_folder = '/' + dataset 
 
     if (perc_poisoning != 0):
         data_folder = str(perc_poisoning) + '_perc_poison/'
     else:
         data_folder = ''
     
-    path = results_folder + classifier + attack_folder + data_folder
+    path = results_folder + classifier + dataset_folder + attack_folder + data_folder
     
     perc_instances = str(int(perc_instances * 100))
     perc_feature_subsampling = str(int(perc_feature_subsampling * 100))
@@ -307,24 +343,26 @@ def main():
     no_iterations = 5
     no_predictors = 60
     
-    #attacks = ['No', 'Dict', 'Empty']
-    attack='Dict' # Choose from 1) 'No' 2) 'Dict' 3) 'Empty'
-    #classifiers = ['logisticReg', 'adaline', 'naivebayes']
-    classifier = 'boldAdaline' # Choose from 1) 'logisticReg', 2) 'adaline'
+    ## SELECT DATASET
+    dataset='enron'
     
-    # ATTACK PARAMETERS
+    ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham')
+    attack='Ham'
+    
+    ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
+    classifier = 'logistic_regression'
+    
+    # SELECT PERCENT OF POISONING
     #perc_poisoning = [0] # No Attack
-    perc_poisoning = [30]
-    #perc_poisoning = [10, 20, 30] # Attack
+    perc_poisoning = [10, 20, 30] # Attack
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
     feature_subsampling = [.5, .7, .9]
     label_switching = [0.0, 0.1, 0.2]
-    # END TEST PARAMETERS
     
     for perc in perc_poisoning:
-        runTests(no_iterations, no_predictors, perc, bagging_samples, feature_subsampling, label_switching, attack, classifier)
+        runTests(no_iterations, no_predictors, perc, bagging_samples, feature_subsampling, label_switching, attack, classifier,dataset=dataset)
     
 # This is the standard boilerplate that calls the main() function.
 if __name__ == '__main__':
