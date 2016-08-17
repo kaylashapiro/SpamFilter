@@ -71,6 +71,7 @@ def poisonData(features, labels,
                generate_attack_data=simple,
                threshold=1.0,
                ham_label=0,
+               spam_label=1,
                ):
     '''
     Returns the input data with *added* data that is crafted specifically to cause
@@ -102,10 +103,12 @@ def poisonData(features, labels,
         
     attack_points = generate_attack_data(no_poisoned, D, d, threshold)
     
+    ## randomly replace some samples with the poisoned ones
+    ## so that total number of samples doesn't change
     poisoned_indices = np.random.choice(N, no_poisoned, replace=False)
         
     X[poisoned_indices] = attack_points
-    Y[poisoned_indices] = 1 # Contamination Assumption
+    Y[poisoned_indices] = spam_label # Contamination Assumption
     
     return (X, Y)
     
