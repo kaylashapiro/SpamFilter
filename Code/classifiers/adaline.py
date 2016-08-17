@@ -10,9 +10,11 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, '../helpers')
 from metrics import computeError
-from helpers import addBias
-from gradientDescent import max_iters  
+from add_bias import addBias
+from gradientdescent import gradient_descent 
 
 def computeCost(trueValues, predictions):
     '''
@@ -41,12 +43,13 @@ def fit(features, labels,
         ham_label=0,
         spam_label=1,
         verbose=True,
-        add_bias = True
         ):
     '''
     Returns the optimal weights for a given training set (features
     and corresponding label inputs) for the ADALINE model.
     These weights are found using the gradient descent method.
+    
+    /!\ Assumes bias term is already in the features input.
         
     Inputs:
     - features: N * D Numpy matrix of binary values (0 and 1)
@@ -60,8 +63,6 @@ def fit(features, labels,
     Output:
     - W: D * 1 Numpy vector of real values
     '''           
-    if (add_bias):
-        features = addBias(features)
     
     ## 0. Prepare notations
     X, Y = features, labels
