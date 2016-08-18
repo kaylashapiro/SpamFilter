@@ -61,13 +61,13 @@ vectorizer = CountVectorizer(min_df=1, stop_words='english', max_features=1000)
 X = vectorizer.fit_transform(corpus)
 
 my_y = pd.DataFrame(y, dtype = np.uint8)
-my_y.to_csv('Labels.csv', index=False, header=False)
+my_y.to_csv('../Datasets/EmailDataProcessed/Labels.csv', index=False, header=False)
 
 my_feat = pd.DataFrame(vectorizer.get_feature_names())
-my_feat.to_csv('Feature_Names.csv', encoding='utf-8', index=False, header=False)
+my_feat.to_csv('../Datasets/EmailDataProcessed/Feature_Names.csv', encoding='utf-8', index=False, header=False)
 
 my_df = pd.DataFrame(X.toarray(), dtype = np.uint8)
-my_df.astype(bool).astype(np.uint8).to_csv('Features.csv', header=False, index=False)
+my_df.astype(bool).astype(np.uint8).to_csv('../Datasets/EmailDataProcessed/Features.csv', header=False, index=False)
 
 #print my_y
 #print my_feat
