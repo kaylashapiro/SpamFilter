@@ -65,7 +65,7 @@ def fit(features, labels,
         learning_rate=.1,
         initial_weights=None,
         convergence_threshold=1e-5,
-        convergence_look_back=2,
+        convergence_look_back=1,
         ham_label=0,
         spam_label=1,
         ):
