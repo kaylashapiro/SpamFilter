@@ -50,20 +50,25 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
         'Empty': '../Datasets/EmptyAttackData/',
     }
     
+    ## path to access the training data
     train_folder = folder_paths[attack] + dataset + '/'
     
+    ## path to access the test data
     test_folder = '../Datasets/TestData/' + dataset + '/'          
 
+    ## access/store data based on percentage of poisoning
     if (perc_poisoning != 0):
         data_folder = str(perc_poisoning) + '_perc_poison/'
     else:
         data_folder = ''
 
+    ## train a single classifier at given poisoning level for a baseline
     print trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier, dataset=dataset)
     
-    # Plain Old Bagging without feature subsampling or label switching
+    ## train a generic bagging classifier without feature_subsampling and label_switching
     print trainBaggedClassifier(no_iterations, no_predictors, 1, 1, 0, perc_poisoning, train_folder, test_folder, data_folder, attack, classifier, dataset=dataset)
     
+    ## train bagged classifiers with feature_subsampling and label_switching
     for perc_bag in bagging_samples:
         for perc_feat in feature_subsampling:
             for perc_label in label_switching:
@@ -95,7 +100,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
     - TNR: true negative rate
     - AUC: AUC value (see sklearn.metrics.roc_auc_score documentation)
     '''
-    
+    ## import the classifier that we are going to train
     try:
         learner = importlib.import_module(classifier)
     except ImportError as error:
@@ -104,6 +109,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         print "Available modules: 1) 'logisticReg' 2) 'adaline'"
         sys.exit(0)
     
+    ## initialize metrics
     sum_error, sum_TPR, sum_FPR, sum_FNR, sum_TNR, sum_AUC = 0, 0, 0, 0, 0, 0
     
     for iter in xrange(no_iterations): 
@@ -129,9 +135,11 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
             X_train = addBias(X_train)
             X_test = addBias(X_test)
     
+        ## train the classifier and make predictions on the test set
         weights = learner.fit(X_train, y_train)
         predictions = learner.predict(X_test, weights)
         
+        ## record the metrics for this iteration
         sum_error += met.computeError(y_test, predictions)
         sum_AUC += met.computeAUC(y_test, predictions)
         [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
@@ -141,15 +149,15 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         sum_FNR += FNR
         sum_TNR += TNR
         
-        
-    error = sum_error/no_iterations # ADD DIVIDE BY ZERO EXCEPTION OR DO A CHECK SOMEWHERE ELSE FOR NO_ITERATIONS
+    ## take the average of all the metrics
+    error = sum_error/no_iterations
     TPR = sum_TPR/no_iterations
     FPR = sum_FPR/no_iterations
     FNR = sum_FNR/no_iterations
     TNR = sum_TNR/no_iterations
     AUC = sum_AUC/no_iterations
     
-    # Arguments 0,0,0 signal base classifier
+    # arguments 0,0,0 signal base classifier
     saveToFile(0,0,0,perc_poisoning,error,TPR,FPR,FNR,TNR,AUC,attack,classifier,dataset=dataset)
     
     return (error, TPR, FPR, FNR, TNR, AUC)
@@ -207,8 +215,10 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
         X_train = addBias(X_train)
         X_test = addBias(X_test)
     
+    ## bag the classifier for a given training and test set
     [sum_errors, sum_TPRs, sum_FPRs, sum_FNRs, sum_TNRs, sum_AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                                                                                         perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
+    ## record the metrics
     sum_errors = np.array([sum_errors])
     sum_TPRs = np.array([sum_TPRs])
     sum_FPRs = np.array([sum_FPRs])
@@ -239,9 +249,10 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
             X_train = addBias(X_train)
             X_test = addBias(X_test)
         
-
+        ## bag the classifier for a given training and test set
         [errors, TPRs, FPRs, FNRs, TNRs, AUCs] = bag.bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                                                                     perc_instances, perc_feature_subsampling, perc_label_switching, classifier)
+        ## record the metrics
         sum_errors = np.concatenate((sum_errors,np.array([errors])), axis=0)                                                     
         sum_TPRs = np.concatenate((sum_TPRs,np.array([TPRs])), axis=0)
         sum_FPRs = np.concatenate((sum_FPRs,np.array([FPRs])), axis=0)    
@@ -249,8 +260,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
         sum_TNRs = np.concatenate((sum_TNRs,np.array([TNRs])), axis=0)
         sum_AUCs = np.concatenate((sum_AUCs,np.array([AUCs])), axis=0)
     
-    #print sum_errors
-    
+    ## take the average of all the metrics
     errors = np.mean(sum_errors, axis=0)
     TPRs = np.mean(sum_TPRs, axis=0)
     FPRs = np.mean(sum_FPRs, axis=0)
@@ -258,8 +268,7 @@ def trainBaggedClassifier(no_iterations, no_predictors, perc_instances, perc_fea
     TNRs = np.mean(sum_TNRs, axis=0)
     AUCs = np.mean(sum_AUCs, axis=0)
     
-    #print errors
-      
+    ## save experiment
     saveToFile(perc_instances,perc_feature_subsampling,perc_label_switching,perc_poisoning,errors,TPRs,FPRs,FNRs,TNRs,AUCs,attack,classifier,dataset=dataset)
     
     return (errors, TPRs, FPRs, FNRs, TNRs, AUCs)
