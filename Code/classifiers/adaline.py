@@ -16,9 +16,12 @@ from metrics import computeError
 from add_bias import addBias
 from gradientdescent import gradient_descent 
 
+def calculate_output(X, W):
+    return np.dot(X, W)
+
 def computeCost(trueValues, predictions):
     '''
-    Calculate cost using means squared
+    Calculate cost using means squared.
     
     Input:
     - trueValues: N * 1 Numpy vector of binary labels
@@ -29,6 +32,7 @@ def computeCost(trueValues, predictions):
     - cost: real number calculated using means squared
     '''  
     trueValues, predictions = map(np.ravel, [trueValues, predictions]) ## make sure shape is (len,) for both
+    
     cost = np.mean(np.square(trueValues - predictions))
     
     return cost
@@ -36,10 +40,12 @@ def computeCost(trueValues, predictions):
 
 def fit(features, labels,
         ## params:
+        batch_size=1,
+        max_epochs=100,
+        learning_rate=.1,
         initial_weights=None,
-        learning_rate=0.1,
-        termination_condition=None,
-        max_epoch=100,
+        convergence_threshold=1e-5,
+        convergence_look_back=2,
         ham_label=0,
         spam_label=1,
         verbose=True,
@@ -67,45 +73,19 @@ def fit(features, labels,
     ## 0. Prepare notations
     X, Y = features, labels
     N, D = features.shape   # N #training samples; D #features
-    cost = []               # keep track of cost
-    error = []              # keep track of error
+    
+    W = gradient_descent(X, Y,
+                         calculate_output,
+                         computeCost,
+                         predict,
+                         batch_size=100,
+                         learning_rate = learning_rate,
+                         max_epochs=max_epochs,
+                         initial_weights=initial_weights,
+                         convergence_threshold=convergence_threshold,
+                         convergence_look_back=convergence_look_back,
+                         )
 
-    ## 1. Initialise weights
-    W = np.zeros((D, 1)) if initial_weights is None else initial_weights.reshape((D, 1))
-
-    ## 2. Evaluate the termination condition
-    epoch = 0
-
-    while epoch < max_epoch:
-        ## current iteration classifier output
-        O = np.dot(X, W)
-
-        ## specialty of ADALINE is that training is done on the weighted sum,
-        ## _before_ the activation function
-        ## batch gradient descent
-        gradient = -np.mean(np.multiply((Y - O), X), axis=0)
-
-        ## 3. Update weights
-        W = W - learning_rate * gradient.reshape(W.shape)
-
-        ## Keep track of error and cost (weights from previous iteration)
-        ## T is equivalent to threshold/step activation function
-        if ham_label is 0:               ## spam label assumed 1
-            T = np.zeros(O.shape)
-            T[O > 0.5] = 1
-        else:   ## ham label is assumed -1, spam label assumed 1
-            T = np.ones(O.shape)
-            T[O < 0] = -1
-
-        #current_error = computeError(T, Y)
-        #error.append(current_error)
-        
-        #current_cost = computeCost(Y, O)
-        #cost.append(current_cost)
-        
-        #if verbose and (epoch%10 == 0): print('iteration %d:\tcost = %.3f' % (epoch, cost[-1]))
-        epoch += 1
-        
     return W
 
 
