@@ -4,6 +4,7 @@ import importlib
 import pandas as pd
 import numpy as np
 import sys
+
 sys.path.insert(0, 'classifiers')
 sys.path.insert(0, 'helpers')
 
@@ -48,9 +49,9 @@ def main():
     df_y_test = pd.read_csv('../Datasets/TestData/enron/y_test_0.csv', header = None)
     y_test = np.array(df_y_test)
 
-    classifier = 'adaline'
+    classifier = 'logistic_regression'
     
-    if classifier != 'naivebayes':
+    if classifier is not 'naivebayes':
         x = addBias(x)
         x_test = addBias(x_test)
     
