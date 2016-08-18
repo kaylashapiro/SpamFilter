@@ -48,6 +48,7 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
         'No': '../Datasets/TrainData/',
         'Dict': '../Datasets/DictAttackData/',
         'Empty': '../Datasets/EmptyAttackData/',
+        'Ham': '../Datasets/HamAttackData/',
     }
     
     ## path to access the training data
