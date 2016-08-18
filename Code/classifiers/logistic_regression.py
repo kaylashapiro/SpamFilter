@@ -1,5 +1,11 @@
 # coding: utf-8
 
+'''
+Implementation of the logistic regression model.
+
+Training is done using stochastic gradient descent.
+'''
+
 import sys
 import numpy as np
 import pandas as pd
