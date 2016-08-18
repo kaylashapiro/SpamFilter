@@ -360,7 +360,7 @@ def main():
     attack='Ham'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
-    classifier = 'logistic_regression'
+    classifier = 'adaline'
     
     # SELECT PERCENT OF POISONING
     #perc_poisoning = [0] # No Attack
