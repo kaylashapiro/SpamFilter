@@ -18,37 +18,38 @@ def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning):
     
     df_no_attack_base = pd.read_csv(no_attack_base, header = 0)
     no_attack_base = np.array(df_no_attack_base)
-    no_attack_base_error = no_attack_base[0][0]
     
     df_no_attack_bag = pd.read_csv(no_attack_bag, header = 0)
     no_attack_bag = np.array(df_no_attack_bag)
-    no_attack_bag_errors = no_attack_bag[:,0]
     
     df_attack_base = pd.read_csv(attack_base, header = 0)
     attack_base = np.array(df_attack_base)
-    #print attack_base
-    attack_base_error = attack_base[0][0]
-    #print attack_base_error
     
     df_attack_bag = pd.read_csv(attack_bag, header = 0)
     attack_bag = np.array(df_attack_bag)
-    #print attack_bag
-    attack_bag_errors = attack_bag[:,0]
-    #print attack_bag_error
     
     N = attack_bag.shape[0]
     
-    error_plot = bag_vs_base_plot_error(classifier, attack, percent_poisoning,
-                                        no_attack_base[0][0], no_attack_bag[:,0], attack_base[0][0], attack_bag[:,0], N)
+    error_plot = error_vs_num_baggers(classifier, attack, percent_poisoning,
+                                      no_attack_base[0][0], no_attack_bag[:,0], attack_base[0][0], attack_bag[:,0], N)
     error_plot.show()
     
-def bag_vs_base_plot_error(classifier, attack, percent_poisoning,
-                           no_attack_base_error, 
-                           no_attack_bag_errors, 
-                           attack_base_error,
-                           attack_bag_errors,
-                           N,
-                           ):    
+    AUC_plot = AUC_vs_num_baggers(classifier, attack, percent_poisoning,
+                                  no_attack_base[0][4], no_attack_bag[:,4], attack_base[0][4], attack_bag[:,4], N)
+    
+    ## THINK ABOUT NAMING/SAVING PLOTS 
+    AUC_plot.show()
+    
+    return
+    
+    
+def error_vs_num_baggers(classifier, attack, percent_poisoning,
+                         no_attack_base_error, 
+                         no_attack_bag_errors, 
+                         attack_base_error,
+                         attack_bag_errors,
+                         N,
+                         ):    
     no_attack_base_errors = np.repeat(no_attack_base_error, N)
     attack_base_errors = np.repeat(attack_base_error, N)
     
@@ -58,8 +59,8 @@ def bag_vs_base_plot_error(classifier, attack, percent_poisoning,
     
     plt.title(title, fontsize=18)
     
-    #plt.xlabel('Number of Baggers')
-    #plt.ylabel('Error Rate')
+    plt.xlabel('Number of Baggers')
+    plt.ylabel('Error Rate')
     
     no_attack_base = plt.plot(X, no_attack_base_errors, 'b--', 
                               label=get_classifier_name(classifier))
@@ -74,7 +75,39 @@ def bag_vs_base_plot_error(classifier, attack, percent_poisoning,
     
     return plt
     
-def get_attack_name(attack, percent_poisoning):
+def AUC_vs_num_baggers(classifier, attack, percent_poisoning,
+                       no_attack_base_AUC, 
+                       no_attack_bag_AUCs, 
+                       attack_base_AUC,
+                       attack_bag_AUCs,
+                       N,
+                       ):  
+    no_attack_base_AUCs = np.repeat(no_attack_base_AUC, N)
+    attack_base_AUCs = np.repeat(attack_base_AUC, N)
+    
+    X = np.linspace(1, N, num=N, endpoint=True)
+    
+    title = get_attack_name(attack, percent_poisoning)
+    
+    plt.title(title, fontsize=18)
+    
+    plt.xlabel('Number of Baggers')
+    plt.ylabel('AUC')
+    
+    no_attack_base = plt.plot(X, no_attack_base_AUCs, 'b--', 
+                              label=get_classifier_name(classifier))
+    no_attack_bag = plt.plot(X, no_attack_bag_AUCs, 'b',
+                             label='Bagged')
+    attack_base = plt.plot(X, attack_base_AUCs, 'r--',
+                           label=get_classifier_name(classifier, percent_poisoning))
+    attack_bag = plt.plot(X, attack_bag_AUCs, 'r',
+                          label='Bagged (poisoned)')
+    
+    legend = plt.legend(loc='bottom right', shadow=True, prop={'size':12})
+    
+    return plt
+    
+def get_attack_name(attack, percent_poisoning=None):
     attacks = {
         'Dict': 'Dictionary Attack',
         'Empty': 'Empty Attack',
@@ -82,7 +115,9 @@ def get_attack_name(attack, percent_poisoning):
     }
     
     attack_name = attacks[attack]
-    poisoning_name = ' (' + str(percent_poisoning) + ' percent poisoning)'
+    
+    if percent_poisoning is not None:
+        poisoning_name = ' (' + str(percent_poisoning) + ' percent poisoning)'
     
     return str(percent_poisoning) + ' percent poisoning'#attack_name + poisoning_name
     
@@ -120,7 +155,7 @@ def main():
     classifier = 'logistic_regression'
     dataset = 'enron'
     attack = 'Dict'
-    percent_poisoning = 10
+    percent_poisoning = 30
     
     bag_vs_base_plot(classifier, dataset, attack, percent_poisoning)
 
