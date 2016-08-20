@@ -40,7 +40,7 @@ def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning):
     FPR_plot.show()
     
     AUC_plot = AUC_vs_num_baggers(classifier, attack, percent_poisoning,
-                                  no_attack_base[0][4], no_attack_bag[:,4], attack_base[0][4], attack_bag[:,4], N)
+                                  no_attack_base[0][5], no_attack_bag[:,5], attack_base[0][5], attack_bag[:,5], N)
     
     AUC_plot.show()
     
