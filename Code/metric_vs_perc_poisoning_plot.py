@@ -6,7 +6,18 @@ import matplotlib.pyplot as plt
 from bagging_plot import get_results_path, get_classifier_name
 
 
-def AUC_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, num_baggers):
+def metric_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, num_baggers, metric):
+    metrics = {
+        'Error Rate': 0,
+        'TPR': 1,
+        'FPR': 2,
+        'FNR': 3,
+        'TNR': 4,
+        'AUC': 5,
+    }
+    
+    y_axis_metric = metrics[metric]
+
     classifier_name = get_classifier_name(classifier)
     attack_name = get_attack_name(attack)
     
@@ -14,11 +25,11 @@ def AUC_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, num_b
     
     X = np.hstack(([0], percent_poisonings))
     
-    base_data = load_base_data(classifier, dataset, attack, percent_poisonings)
+    base_data = load_base_data(classifier, dataset, attack, y_axis_metric, percent_poisonings)
 
     plt.plot(X, base_data, label='generic classifier')
     
-    data = load_bagging_data(classifier, dataset, attack, percent_poisonings, num_baggers)
+    data = load_bagging_data(classifier, dataset, attack, y_axis_metric, percent_poisonings, num_baggers)
               
     for line in xrange(num_lines_to_plot):
         plt.plot(X, data[line], label=get_label(num_baggers, line))
@@ -27,15 +38,16 @@ def AUC_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, num_b
     title = classifier_name + ' (' + get_attack_name(attack) + ')'
     
     plt.xlabel('Percent Poisoning')
-    plt.ylabel('AUC')
+    plt.ylabel(metric)
     plt.title(title, fontsize=18)
     
     return plt
     
-def load_bagging_data(classifier, dataset, attack, 
+def load_bagging_data(classifier, dataset, attack, y_axis_metric,
               ## params
               percent_poisonings=[10, 20, 30], 
-              num_baggers=[3, 5, 10, 20, 50]):
+              num_baggers=[3, 5, 10, 20, 50]
+              ):
     '''
     Input:
     - classifier: string; ['adaline', 'logistic_regression', 'naivebayes']
@@ -59,21 +71,21 @@ def load_bagging_data(classifier, dataset, attack,
     
     df_base_bagger = pd.read_csv(base_path + bagging_file, header = 0)
     base_bagger = np.array(df_base_bagger)
-    AUCs = base_bagger[:,5]
+    y_axis_metrics = base_bagger[:,y_axis_metric]
     
-    data = np.reshape(AUCs[num_baggers], (num_lines_to_plot, 1))
+    data = np.reshape(y_axis_metrics[num_baggers], (num_lines_to_plot, 1))
     
     for percent_poison in percent_poisonings:
         path = get_results_path(classifier, dataset, attack, percent_poison)
         df_poison_bagger = pd.read_csv(path + bagging_file, header = 0)
         bagger = np.array(df_poison_bagger)
-        AUCs = bagger[:,5]
-        bagger_data = np.reshape(AUCs[num_baggers], (num_lines_to_plot, 1))
+        y_axis_metrics = bagger[:,y_axis_metric]
+        bagger_data = np.reshape(y_axis_metrics[num_baggers], (num_lines_to_plot, 1))
         data = np.hstack((data, bagger_data))
     
     return data
     
-def load_base_data(classifier, dataset, attack,
+def load_base_data(classifier, dataset, attack, y_axis_metric,
                    ## params
                    percent_poisonings=[10, 20, 30]
                    ):
@@ -82,13 +94,13 @@ def load_base_data(classifier, dataset, attack,
     df_base = pd.read_csv(base_path + base_file, header = 0)
     base = np.array(df_base)
     
-    data = [base[0][5]] 
+    data = [base[0][y_axis_metric]] 
     
     for percent_poison in percent_poisonings:
         path = get_results_path(classifier, dataset, attack, percent_poison)
         df_poison_base = pd.read_csv(path + base_file, header = 0)
         base = np.array(df_poison_base)
-        data.append(base[0][5])
+        data.append(base[0][y_axis_metric])
                 
     return data
     
@@ -112,11 +124,12 @@ def get_attack_name(attack, percent_poisoning=None):
 def main():
     classifier = 'logistic_regression'
     dataset = 'enron'
-    attack = 'Dict'
+    attack = 'Empty'
     percent_poisoning = [10, 20, 30]
     num_baggers = [3, 5, 10, 20, 50]
+    metric = 'Error Rate'
     
-    plot = AUC_vs_perc_poisoning(classifier, dataset, attack, percent_poisoning, num_baggers)
+    plot = metric_vs_perc_poisoning(classifier, dataset, attack, percent_poisoning, num_baggers, metric)
 
     plot.show()
     
