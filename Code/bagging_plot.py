@@ -34,10 +34,14 @@ def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning):
                                       no_attack_base[0][0], no_attack_bag[:,0], attack_base[0][0], attack_bag[:,0], N)
     error_plot.show()
     
+    FPR_plot = FPR_vs_num_baggers(classifier, attack, percent_poisoning,
+                                  no_attack_base[0][2], no_attack_bag[:,2], attack_base[0][2], attack_bag[:,2], N)
+                                  
+    FPR_plot.show()
+    
     AUC_plot = AUC_vs_num_baggers(classifier, attack, percent_poisoning,
                                   no_attack_base[0][4], no_attack_bag[:,4], attack_base[0][4], attack_bag[:,4], N)
     
-    ## THINK ABOUT NAMING/SAVING PLOTS 
     AUC_plot.show()
     
     return
@@ -75,6 +79,38 @@ def error_vs_num_baggers(classifier, attack, percent_poisoning,
     
     return plt
     
+def FPR_vs_num_baggers(classifier, attack, percent_poisoning,
+                       no_attack_base_FPR,
+                       no_attack_bag_FPRs,
+                       attack_base_FPR,
+                       attack_bag_FPRs,
+                       N,
+                       ):
+    no_attack_base_FPRs = np.repeat(no_attack_base_FPR, N)
+    attack_base_FPRs = np.repeat(attack_base_FPR, N)
+    
+    X = np.linspace(1, N, num=N, endpoint=True)
+    
+    title = get_attack_name(attack, percent_poisoning)
+    
+    plt.title(title, fontsize=18)
+    
+    plt.xlabel('Number of Baggers')
+    plt.ylabel('FPR')
+    
+    no_attack_base = plt.plot(X, no_attack_base_FPRs, 'b--', 
+                              label=get_classifier_name(classifier))
+    no_attack_bag = plt.plot(X, no_attack_bag_FPRs, 'b',
+                             label='Bagged')
+    attack_base = plt.plot(X, attack_base_FPRs, 'r--',
+                           label=get_classifier_name(classifier, percent_poisoning))
+    attack_bag = plt.plot(X, attack_bag_FPRs, 'r',
+                          label='Bagged (poisoned)')
+    
+    legend = plt.legend(loc='lower right', shadow=True, prop={'size':12})
+    
+    return plt
+    
 def AUC_vs_num_baggers(classifier, attack, percent_poisoning,
                        no_attack_base_AUC, 
                        no_attack_bag_AUCs, 
@@ -103,7 +139,7 @@ def AUC_vs_num_baggers(classifier, attack, percent_poisoning,
     attack_bag = plt.plot(X, attack_bag_AUCs, 'r',
                           label='Bagged (poisoned)')
     
-    legend = plt.legend(loc='bottom right', shadow=True, prop={'size':12})
+    legend = plt.legend(loc='lower right', shadow=True, prop={'size':12})
     
     return plt
     
