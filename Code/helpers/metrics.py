@@ -22,34 +22,6 @@ def computeError(y, predictions):
     
     return error
     
-def computeMetrics(y, predictions):
-    '''
-    Returns the number of true positives, false positives, false
-    negatives, and true negatives for a given training set and its
-    predicted classes.
-    
-    Input:
-    - y: N * 1 Numpy vector of binary feature values (0 and 1);
-         class labels
-    - predictions: N * 1 Numpy vector of binary values (0 and 1);
-                   predicted classes
-    
-    Output:
-    - TP: number of true positives
-    - FP: number of false positives
-    - FN: number of false negatives
-    - TN: number of true negatives
-    '''
-    #N = y.shape[0]
-    cm  = confusion_matrix(np.ravel(y), np.ravel(predictions))
-
-    TP = cm[0][0]
-    FP = cm[0][1]
-    FN = cm[1][0]
-    TN = cm[1][1]
-    
-    return (TP, FP, FN, TN)
-    
 def computeROC(y, predictions, pos_label=1):
     '''
     Returns the false positive rate and true positive rate for 
@@ -85,29 +57,54 @@ def computeAUC(y, predictions):
     
     return AUC
     
-def computeRates(TP, FP, FN, TN):
-    if ((TP + FN) == 0):
-        TPR = float('nan')
-        FNR = float('nan')
-    else:
-        TPR = float(TP)/(TP + FN)
-        FNR = 1 - TPR
-    if ((TN + FP) == 0):
-        TNR = float('nan')
-        FPR = float('nan')
-    else:
-        TNR = float(TN)/(TN + FP)
-        FPR = 1 - TNR
+def computeRates(Y, O, ham_label, spam_label):
+    
+    TPR = get_TPR(Y, O, ham_label, spam_label)
+    FPR = get_FPR(Y, O, ham_label, spam_label)
+    FNR = 1 - TPR
+    TNR = 1 - FPR
     
     return (TPR, FPR, FNR, TNR)
+
+def get_FPR(Y, O, ham_label, spam_label):
+    '''
+    Calculates False Positive Rate (=fall-out), also called false alarm rate
+    
+    Input:
+    - Y: N * 1 Numpy vector of binary values (0 and 1); class labels
+    - O: N * 1 Numpy vector of binary values (0 and 1); predicted class labels
+    
+    Output:
+    - FPR: float, false positive rate
+    '''
+    Y, O = map(np.ravel, [Y, O]) ## make sure shape is (len,) for both
+    FP = np.sum((O == spam_label) & (Y == ham_label))
+    N =  np.sum(Y == ham_label) ## FP + TN
+    FPR = float(FP) / N
+    return FPR
+
+def get_TPR(Y, O, ham_label, spam_label):
+    '''
+    Calculates True Positive Rate
+    
+    Input:
+    - Y: N * 1 Numpy vector of binary values (0 and 1); class labels
+    - O: N * 1 Numpy vector of binary values (0 and 1); predicted class labels
+    
+    Output:
+    - TNR: float, true negative rate
+    '''
+    Y, O = map(np.ravel, [Y, O]) ## make sure shape is (len,) for both
+    TP = np.sum((O == spam_label) & (Y == spam_label))
+    P =  np.sum(Y == spam_label) ## TP + FN
+    TNR = float(TP) / P
+    return TNR
     
 def main():  
     y_true = np.array([0, 0, 1, 1])
     y_scores = np.array([0, 0, 0, 0])
     TP, FP, FN, TN = computeMetrics(y_true, y_scores)
     print computeRates(TP,FP,FN,TN)
-    
-    
     
     
 # This is the standard boilerplate that calls the main() function.
