@@ -12,7 +12,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from metrics import computeError
 from helpers import addBias
-from gradientDescent import max_iters  
 
 def computeCost(trueValues, predictions):
     '''
