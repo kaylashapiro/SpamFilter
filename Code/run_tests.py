@@ -359,7 +359,7 @@ def main():
     dataset='enron'
     
     ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham', 'Ham2')
-    attack='Dict'
+    attack='Ham'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
     classifier = 'adaline'
@@ -367,7 +367,7 @@ def main():
     # SELECT PERCENT OF POISONING
     #perc_poisoning = [0] # No Attack
     #perc_poisoning = [10, 20, 30] # Attack
-    perc_poisoning = [30]
+    perc_poisoning = [10]
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
