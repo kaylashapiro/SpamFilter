@@ -3,7 +3,7 @@
 import sys
 import numpy as np
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier as weak_learner
+from sklearn.linear_model import SGDClassifier as weak_learner
 from sklearn.ensemble import AdaBoostClassifier
 
 sys.path.insert(0, '../classifiers')
@@ -11,6 +11,7 @@ sys.path.insert(0, '../helpers')
 
 import metrics as met
 from add_bias import addBias
+from featureSubsampling import featureSubsampling
 
 def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False, classifier='DecisionTree'):
     '''
@@ -35,7 +36,7 @@ def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False, cl
     '''
     N = X.shape[0]
 
-    classifier = weak_learner(max_depth=5)
+    classifier = weak_learner(loss='log', penalty='none')
     
     # sklearn implementation requires y to be flattened
     y = np.ravel(y)
@@ -69,7 +70,12 @@ def boost(X, y, sample_weight, learning_rate=.1, epochs=100, terminate=False, cl
     
     return classifier, new_sample_weight, alpha, terminate
 
-def fit(X, y, X_test, y_test, learning_rate=.1, epochs=100, no_predictors=50, add_bias=True):
+def fit(X, y, X_test, y_test, 
+        learning_rate=.1, 
+        epochs=100, 
+        no_predictors=50, 
+        ham_label=0,
+        spam_label=1):
     '''
     AdaBoost classifier training.
     
@@ -113,10 +119,8 @@ def fit(X, y, X_test, y_test, learning_rate=.1, epochs=100, no_predictors=50, ad
         errors.append(met.computeError(y_test, predictions))
         
         AUCs.append(met.computeAUC(y_test, predictions))
-        
-        [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
-        
-        [TPR, FPR, FNR, TNR] = met.computeRates(TP, FP, FN, TN)
+                
+        [TPR, FPR, FNR, TNR] = met.computeRates(y_test, predictions, ham_label, spam_label)
         
         TPRs.append(TPR)
         FPRs.append(FPR)
@@ -166,48 +170,22 @@ def main():
     x = np.array(df_x)
     print x
     
-    x = addBias(x)
+    x_train, x_test = featureSubsampling(x, x, .7)
+    x_train = addBias(x_train)
+    x_test = addBias(x_test)
     
     df_y = pd.read_csv('../../Datasets/TrainData/enron/y_train_0.csv', header = None)
-    y = np.array(df_y)
+    y = np.ravel(np.array(df_y))
     print y   
     
-    
-    '''
-    x = np.array([[1, 0, 1],		
-        [0, 0, 0],		
-        [1, 0, 1],		
-        [1, 1, 1],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [0, 1, 0]],		
-        dtype=np.int8)		
-    print x
-    
-    y = np.array([[1],		
-        [1],		
-        [1],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [1]],		
-        dtype=np.int8)
-    print y
-    '''
     # BASE CLASSIFIER
-    classifier = weak_learner(max_depth=5)
+    classifier = weak_learner(loss='log', penalty='none')
     classifier.fit(x, y)
     predictions = classifier.predict(x)
     print 'BASE CLASSIFIER ERROR:', met.computeError(y, predictions)
     
     
-    classifiers, alphas, errors, TPRs, FPRs, FNRs, TNRs, AUCs = fit(x,y,x,y,no_predictors=3)
+    classifiers, alphas, errors, TPRs, FPRs, FNRs, TNRs, AUCs = fit(x,y,x,y,no_predictors=10)
     print 'Final Classifier:', classifiers[-1] 
     
     predictions = predict(x, classifiers, alphas)
