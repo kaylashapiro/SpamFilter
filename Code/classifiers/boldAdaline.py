@@ -10,8 +10,11 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, '../helpers')
+
 from metrics import computeError
-from helpers import addBias
+from add_bias import addBias
 
 def computeCost(trueValues, predictions):
     '''
