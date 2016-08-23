@@ -6,7 +6,12 @@ import matplotlib.pyplot as plt
 from bagging_plot import get_results_path, get_classifier_name
 
 
-def metric_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, num_baggers, metric):
+def metric_vs_perc_poisoning(classifier, dataset, attack, 
+                             percent_poisonings, 
+                             num_baggers, 
+                             metric,
+                             include_baggers=False,
+                             ):
     metrics = {
         'Error Rate': 0,
         'TPR': 1,
@@ -27,19 +32,21 @@ def metric_vs_perc_poisoning(classifier, dataset, attack, percent_poisonings, nu
     
     base_data = load_base_data(classifier, dataset, attack, y_axis_metric, percent_poisonings)
 
-    plt.plot(X, base_data, label='generic classifier')
+    plt.plot(X, base_data, label='base classifier')
     
-    data = load_bagging_data(classifier, dataset, attack, y_axis_metric, percent_poisonings, num_baggers)
+    if include_baggers:
+        data = load_bagging_data(classifier, dataset, attack, y_axis_metric, percent_poisonings, num_baggers)
               
-    for line in xrange(num_lines_to_plot):
-        plt.plot(X, data[line], label=get_label(num_baggers, line))
+        for line in xrange(num_lines_to_plot):
+            plt.plot(X, data[line], label=get_label(num_baggers, line))
+        if y_axis_metric == 0:
+            legend = plt.legend(loc='upper left', shadow=True, prop={'size':12})
     
-    legend = plt.legend(loc='lower left', shadow=True, prop={'size':12})
     title = classifier_name + ' (' + get_attack_name(attack) + ')'
     
-    plt.xlabel('Percent Poisoning')
-    plt.ylabel(metric)
-    plt.title(title, fontsize=18)
+    plt.xlabel('Percent Poisoning', fontsize=16)
+    plt.ylabel(metric, fontsize=16)
+    #plt.title(title, fontsize=20)
     
     return plt
     
@@ -120,18 +127,63 @@ def get_attack_name(attack, percent_poisoning=None):
     
     return attack_name    
     
+def get_filename(classifier,
+                 dataset,
+                 attack,
+                 metric,
+                 include_baggers):
+    classifier_names = {
+        'adaline' : 'AD_',
+        'logistic_regression' : 'LR_',
+        'naivebayes' : 'NB_',
+    }
+    
+    classifier_name = classifier_names[classifier]
+    
+    base = '_'
+    
+    if not include_baggers:
+        base = '_base_'
+    
+    if metric is 'Error Rate':
+        metric = 'error'
+    
+    name = classifier_name + dataset + base + attack + '_' + metric + '_vs_perc_poisoning.png'
+    
+    return name   
 
 def main():
     classifier = 'logistic_regression'
-    dataset = 'enron'
-    attack = 'Empty'
+    #dataset = 'enron'
+    #attack = 'Ham'
+    
+    
+    #metric = 'FPR'
+    
+    
+    datasets = ['enron', 'lingspam']
+    attacks = ['Dict', 'Empty', 'Ham']
     percent_poisoning = [10, 20, 30]
     num_baggers = [3, 5, 10, 20, 50]
-    metric = 'Error Rate'
+    metrics = ['Error Rate', 'TPR', 'FPR', 'FNR', 'TNR', 'AUC']
+    include_baggers=True
     
-    plot = metric_vs_perc_poisoning(classifier, dataset, attack, percent_poisoning, num_baggers, metric)
+    for dataset in datasets:
+        for attack in attacks:
+            for metric in metrics:
+                plot = metric_vs_perc_poisoning(classifier, 
+                                                dataset, 
+                                                attack, 
+                                                percent_poisoning, 
+                                                num_baggers, 
+                                                metric,
+                                                include_baggers)
 
-    plot.show()
+                name = get_filename(classifier, dataset, attack, metric, include_baggers)                                
+                print name
+                path = '../Plots/bagging/'
+                plot.savefig(path + name)
+                plot.gcf().clear()
     
     return
     
