@@ -97,14 +97,13 @@ def get_TPR(Y, O, ham_label, spam_label):
     Y, O = map(np.ravel, [Y, O]) ## make sure shape is (len,) for both
     TP = np.sum((O == spam_label) & (Y == spam_label))
     P =  np.sum(Y == spam_label) ## TP + FN
-    TNR = float(TP) / P
-    return TNR
+    TPR = float(TP) / P
+    return TPR
     
 def main():  
     y_true = np.array([0, 0, 1, 1])
     y_scores = np.array([0, 0, 0, 0])
-    TP, FP, FN, TN = computeMetrics(y_true, y_scores)
-    print computeRates(TP,FP,FN,TN)
+    print computeRates(y_true, y_scores, 0, 1)
     
     
 # This is the standard boilerplate that calls the main() function.

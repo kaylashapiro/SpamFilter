@@ -4,7 +4,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning):
+def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning, metric):
+    metrics = {
+        'Error Rate': 0,
+        'TPR': 1,
+        'FPR': 2,
+        'FNR': 3,
+        'TNR': 4,
+        'AUC': 5,
+    }
+    
+    y_axis_metric = metrics[metric]
+
     no_attack_path = get_results_path(classifier, dataset, 'No')
     attack_path = get_results_path(classifier, dataset, attack, percent_poisoning)
     
@@ -30,29 +41,19 @@ def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning):
     
     N = attack_bag.shape[0]
     
-    error_plot = error_vs_num_baggers(classifier, attack, percent_poisoning,
-                                      no_attack_base[0][0], no_attack_bag[:,0], attack_base[0][0], attack_bag[:,0], N)
-    error_plot.show()
+    plot = metric_vs_num_baggers(classifier, attack, percent_poisoning,
+                                no_attack_base[0][y_axis_metric], no_attack_bag[:,y_axis_metric], attack_base[0][y_axis_metric], attack_bag[:,y_axis_metric], N, metric)
     
-    FPR_plot = FPR_vs_num_baggers(classifier, attack, percent_poisoning,
-                                  no_attack_base[0][2], no_attack_bag[:,2], attack_base[0][2], attack_bag[:,2], N)
-                                  
-    FPR_plot.show()
-    
-    AUC_plot = AUC_vs_num_baggers(classifier, attack, percent_poisoning,
-                                  no_attack_base[0][5], no_attack_bag[:,5], attack_base[0][5], attack_bag[:,5], N)
-    
-    AUC_plot.show()
-    
-    return
+    return plot
     
     
-def error_vs_num_baggers(classifier, attack, percent_poisoning,
+def metric_vs_num_baggers(classifier, attack, percent_poisoning,
                          no_attack_base_error, 
                          no_attack_bag_errors, 
                          attack_base_error,
                          attack_bag_errors,
                          N,
+                         metric,
                          ):    
     no_attack_base_errors = np.repeat(no_attack_base_error, N)
     attack_base_errors = np.repeat(attack_base_error, N)
@@ -64,7 +65,7 @@ def error_vs_num_baggers(classifier, attack, percent_poisoning,
     plt.title(title, fontsize=18)
     
     plt.xlabel('Number of Baggers')
-    plt.ylabel('Error Rate')
+    plt.ylabel(metric)
     
     no_attack_base = plt.plot(X, no_attack_base_errors, 'b--', 
                               label=get_classifier_name(classifier))
@@ -75,71 +76,7 @@ def error_vs_num_baggers(classifier, attack, percent_poisoning,
     attack_bag = plt.plot(X, attack_bag_errors, 'r',
                           label='Bagged (poisoned)')
     
-    legend = plt.legend(loc='upper right', shadow=True, prop={'size':12})
-    
-    return plt
-    
-def FPR_vs_num_baggers(classifier, attack, percent_poisoning,
-                       no_attack_base_FPR,
-                       no_attack_bag_FPRs,
-                       attack_base_FPR,
-                       attack_bag_FPRs,
-                       N,
-                       ):
-    no_attack_base_FPRs = np.repeat(no_attack_base_FPR, N)
-    attack_base_FPRs = np.repeat(attack_base_FPR, N)
-    
-    X = np.linspace(1, N, num=N, endpoint=True)
-    
-    title = get_attack_name(attack, percent_poisoning)
-    
-    plt.title(title, fontsize=18)
-    
-    plt.xlabel('Number of Baggers')
-    plt.ylabel('FPR')
-    
-    no_attack_base = plt.plot(X, no_attack_base_FPRs, 'b--', 
-                              label=get_classifier_name(classifier))
-    no_attack_bag = plt.plot(X, no_attack_bag_FPRs, 'b',
-                             label='Bagged')
-    attack_base = plt.plot(X, attack_base_FPRs, 'r--',
-                           label=get_classifier_name(classifier, percent_poisoning))
-    attack_bag = plt.plot(X, attack_bag_FPRs, 'r',
-                          label='Bagged (poisoned)')
-    
-    legend = plt.legend(loc='lower right', shadow=True, prop={'size':12})
-    
-    return plt
-    
-def AUC_vs_num_baggers(classifier, attack, percent_poisoning,
-                       no_attack_base_AUC, 
-                       no_attack_bag_AUCs, 
-                       attack_base_AUC,
-                       attack_bag_AUCs,
-                       N,
-                       ):  
-    no_attack_base_AUCs = np.repeat(no_attack_base_AUC, N)
-    attack_base_AUCs = np.repeat(attack_base_AUC, N)
-    
-    X = np.linspace(1, N, num=N, endpoint=True)
-    
-    title = get_attack_name(attack, percent_poisoning)
-    
-    plt.title(title, fontsize=18)
-    
-    plt.xlabel('Number of Baggers')
-    plt.ylabel('AUC')
-    
-    no_attack_base = plt.plot(X, no_attack_base_AUCs, 'b--', 
-                              label=get_classifier_name(classifier))
-    no_attack_bag = plt.plot(X, no_attack_bag_AUCs, 'b',
-                             label='Bagged')
-    attack_base = plt.plot(X, attack_base_AUCs, 'r--',
-                           label=get_classifier_name(classifier, percent_poisoning))
-    attack_bag = plt.plot(X, attack_bag_AUCs, 'r',
-                          label='Bagged (poisoned)')
-    
-    legend = plt.legend(loc='lower right', shadow=True, prop={'size':12})
+    #legend = plt.legend(loc='upper right', shadow=True, prop={'size':12})
     
     return plt
     
@@ -192,8 +129,11 @@ def main():
     dataset = 'enron'
     attack = 'Dict'
     percent_poisoning = 30
+    metric = 'FNR'
     
-    bag_vs_base_plot(classifier, dataset, attack, percent_poisoning)
-
+    plot = bag_vs_base_plot(classifier, dataset, attack, percent_poisoning, metric)
+    plot.show()
+    
+    
 if __name__ == '__main__':
     main()

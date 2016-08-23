@@ -10,6 +10,7 @@ sys.path.insert(0, 'helpers')
 
 from metrics import computeError, computeMetrics, computeRates, computeAUC
 from add_bias import addBias
+from performance import get_FPR, get_FNR, get_TPR
 
 def run_classifier(features, labels, X_test, Y_test,
                    ## params
@@ -31,16 +32,20 @@ def run_classifier(features, labels, X_test, Y_test,
     
     error = computeError(Y_test, pred)
     TP, FP, FN, TN = computeMetrics(Y_test, pred)
-    TPR, FPR, FNR, TNR = computeRates(TP, FP, FN, TN)
+    print 'TP:', TP
+    print 'FP:', FP
+    TPR, FPR, FNR, TNR = computeRates(Y_test, pred, 0, 1)
+
+    
     AUC = computeAUC(Y_test, pred)
     return (error, TPR, FPR, FNR, TNR, AUC) 
         
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_x = pd.read_csv('../Datasets/TrainData/enron/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../Datasets/Ham2AttackData/enron/30_perc_poison/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/TrainData/enron/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/Ham2AttackData/enron/30_perc_poison/y_train_0.csv', header = None)
     y = np.array(df_y)
    
     df_x_test = pd.read_csv('../Datasets/TestData/enron/X_test_0.csv', header = None)

@@ -108,7 +108,7 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         learner = importlib.import_module(classifier)
     except ImportError as error:
         print error
-        print "Failed to import learner module in runTests2.py"
+        print "Failed to import learner module in run_tests.py"
         print "Available modules: 1) 'logisticReg' 2) 'adaline'"
         sys.exit(0)
     
@@ -359,14 +359,14 @@ def main():
     dataset='enron'
     
     ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham', 'Ham2')
-    attack='No'
+    attack='Dict'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
-    classifier = 'naivebayes'
+    classifier = 'adaline'
     
     # SELECT PERCENT OF POISONING
-    perc_poisoning = [0] # No Attack
-    #perc_poisoning = [10, 20, 30] # Attack
+    #perc_poisoning = [0] # No Attack
+    perc_poisoning = [10, 20, 30] # Attack
     #perc_poisoning = [30]
     
     # BAGGING PARAMETERS
