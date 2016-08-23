@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn.naive_bayes import BernoulliNB
 
 sys.path.insert(0, '../helpers')
-from metrics import computeError, computeMetrics
+from metrics import computeError
 
 def process_parameters(p, tolerance=1e-10):
     '''
