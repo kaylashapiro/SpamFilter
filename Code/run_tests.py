@@ -80,7 +80,9 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
 def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder, data_folder, 
                         attack='Dict', 
                         classifier='logistic_regression',
-                        dataset=None):
+                        dataset=None,
+                        ham_label=0,
+                        spam_label=1):
     '''
     Inputs:
     - no_iterations: integer number of experiments to run on a given test set-up; results of the experiments are
@@ -143,8 +145,8 @@ def trainBaseClassifier(no_iterations, perc_poisoning, train_folder, test_folder
         ## record the metrics for this iteration
         sum_error += met.computeError(y_test, predictions)
         sum_AUC += met.computeAUC(y_test, predictions)
-        [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
-        [TPR, FPR, FNR, TNR] = met.computeRates(TP, FP, FN, TN)
+        [TPR, FPR, FNR, TNR] = met.computeRates(y_test, predictions, ham_label, spam_label)
+        
         sum_TPR += TPR
         sum_FPR += FPR
         sum_FNR += FNR
@@ -356,15 +358,16 @@ def main():
     ## SELECT DATASET
     dataset='enron'
     
-    ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham')
-    attack='Ham'
+    ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham', 'Ham2')
+    attack='No'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
     classifier = 'naivebayes'
     
     # SELECT PERCENT OF POISONING
-    #perc_poisoning = [0] # No Attack
-    perc_poisoning = [10, 20, 30] # Attack
+    perc_poisoning = [0] # No Attack
+    #perc_poisoning = [10, 20, 30] # Attack
+    #perc_poisoning = [30]
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
