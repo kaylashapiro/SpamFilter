@@ -27,7 +27,9 @@ import labelSwitching as ls
 
 def bagPredictors(X_train, y_train, X_test, y_test, no_predictors, 
                   perc_instances=1, perc_feature_subsampling=1, perc_label_switching=0,
-                  classifier='logisticReg'):
+                  classifier='logistic_regression',
+                  ham_label=0,
+                  spam_label=1):
     '''
     Returns array of error rates for each time a predictor is added to the
     bagged classifier. The last error rate in the bag represents the error
@@ -92,9 +94,7 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
     
     AUCs.append(met.computeAUC(y_test, predictions))
     
-    [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
-    
-    [TPR, FPR, FNR, TNR] = met.computeRates(TP, FP, FN, TN)
+    [TPR, FPR, FNR, TNR] = met.computeRates(y_test, predictions, ham_label, spam_label)
     
     TPRs.append(TPR)
     FPRs.append(FPR)
@@ -116,10 +116,8 @@ def bagPredictors(X_train, y_train, X_test, y_test, no_predictors,
         errors.append(met.computeError(y_test, predictions))
         
         AUCs.append(met.computeAUC(y_test, predictions))
-        
-        [TP, FP, FN, TN] = met.computeMetrics(y_test, predictions)
-    
-        [TPR, FPR, FNR, TNR] = met.computeRates(TP, FP, FN, TN)
+                
+        [TPR, FPR, FNR, TNR] = met.computeRates(y_test, predictions, ham_label, spam_label)
     
         TPRs.append(TPR)
         FPRs.append(FPR)
