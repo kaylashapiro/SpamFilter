@@ -1,7 +1,7 @@
 # coding: utf-8
 
 '''
-Implementation of stochastic gradient descent with ADAGRAD
+Implementation of stochastic gradient descent with ADADELTA
 adaptive learning rate.
 '''
 
@@ -9,22 +9,23 @@ import numpy as np
 from collections import deque
 from metrics import computeError
     
-def adagrad(features, labels,
-            ## functions specific to classifier:
-            calculate_output,
-            cost_function,
-            predict,
-            ## params:
-            learning_rate=.1,
-            max_epochs=100,
-            initial_weights=None,
-            convergence_threshold=1e-5,
-            convergence_look_back=1,
-            smoothing_term=1e-8,
-            ):
+def adadelta(features, labels,
+             ## functions specific to classifier:
+             calculate_output,
+             cost_function,
+             predict,
+             ## params:
+             learning_rate=.1,
+             max_epochs=100,
+             initial_weights=None,
+             convergence_threshold=1e-5,
+             convergence_look_back=1,
+             smoothing_term=1e-8,
+             decay=0.9,
+             ):
     '''
     Returns the optimal weights for a given training set and a given model 
-    using the stochastic gradient descent method with an ADAGRAD adaptive
+    using the stochastic gradient descent method with an ADADELTA adaptive
     learning rate. The model is determined by the 'calculate_output', 
     'cost_function' and 'predict' functions.
     
@@ -60,8 +61,9 @@ def adagrad(features, labels,
     previous_errors = deque(maxlen=convergence_look_back)
     previous_errors.append(1e6)
     
-    ## store gradient sum of squares
-    gti = np.zeros(D)
+    ## initialise 
+    mean_gradient_square = 0
+    mean_updates_square = 0
     
     epoch = 0
     while epoch < max_epochs:
@@ -84,14 +86,17 @@ def adagrad(features, labels,
             ## gradient equation was obtained by deriving the LMS cost function
             gradient = -np.multiply((y - o), x)
             
-            ## add square of gradient
-            gti += gradient ** 2
+            ## add proportion of square of gradient
+            mean_gradient_square = decay * mean_gradient_square + (1 - decay) * gradient ** 2
             
-            ## adagrad adjustment
-            adjusted_gradient = gradient / (np.sqrt(gti) + smoothing_term) 
+            ## adadelta adjustment
+            adjusted_gradient = np.sqrt((mean_updates_square + smoothing_term) / (mean_gradient_square + smoothing_term)) * gradient
+            
+            ## add proportion of square of the adjusted gradient
+            mean_updates_square = decay * mean_updates_square + (1 - decay) * adjusted_gradient ** 2
 
             ## update weights
-            W = W - learning_rate * adjusted_gradient.reshape(W.shape)
+            W = W - adjusted_gradient.reshape(W.shape)
             
         ## Keep track of cost and error
         P = predict(X, W)
