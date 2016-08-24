@@ -1,12 +1,12 @@
 # coding: utf-8
 
 '''
-Adapted from: https://github.com/galvanic/adversarialML/blob/master/helpers/gradientdescent.py
+Implementation of stochastic gradient descent with ADAGRAD
+adaptive learning rate.
 '''
 
 import numpy as np
 from collections import deque
-from math import ceil
 from metrics import computeError
     
 def adagrad(features, labels,
@@ -15,7 +15,6 @@ def adagrad(features, labels,
             cost_function,
             predict,
             ## params:
-            batch_size=1,
             learning_rate=.1,
             max_epochs=100,
             initial_weights=None,
@@ -35,10 +34,6 @@ def adagrad(features, labels,
                 with N: the number of training examples
                 and  D: the number of features for each example
     - labels: N * 1 Numpy vector of binary values (0 and 1)
-    - batch_size: int between 1 and N
-                    1 = stochastic gradient descent
-                    N = batch gradient descent
-                    everything in between = mini-batch gradient descent
     - learning_rate: float, between 0 and 1
     - max_epochs: int, >= 0; maximum number of times to run through training set
     - initial_weights: D * 1 Numpy vector of feature weights
@@ -46,12 +41,13 @@ def adagrad(features, labels,
     - convergence_look_back: int, >= 1
                              stops if the error difference hasn't been over threshold
                              for the last X epochs.
+    - smoothing_term: very small number; e.g. 1e-8,
+                      ensure no divide by zero error.
     
     Output:
     - W: D * 1 Numpy vector of real values
+    '''
     
-    TODO adaptive learning rate
-    '''    
     ## notation
     X, Y = features, labels
     N, D = X.shape # N training samples; D features
@@ -75,8 +71,6 @@ def adagrad(features, labels,
         
         X = X[permuted_indices, :]
         Y = Y[permuted_indices]
-        #print X.shape
-        #print Y.shape
         
         for instance in xrange(N):
             x = X[instance]
@@ -89,8 +83,10 @@ def adagrad(features, labels,
             ## gradient equation was obtained by deriving the LMS cost function
             gradient = -np.multiply((y - o), x)
             
+            ## add square of gradient
             gti += gradient ** 2
             
+            ## adagrad adjustment
             adjusted_gradient = gradient / (np.sqrt(gti) + smoothing_term) 
 
             ## update weights
