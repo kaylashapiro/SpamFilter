@@ -49,6 +49,7 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
         'Dict': '../Datasets/DictAttackData/',
         'Empty': '../Datasets/EmptyAttackData/',
         'Ham': '../Datasets/HamAttackData/',
+        'Ham2': '../Datasets/Ham2AttackData/'
     }
     
     ## path to access the training data
@@ -359,15 +360,15 @@ def main():
     dataset='enron'
     
     ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham', 'Ham2')
-    attack='Ham'
+    attack='No'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
-    classifier = 'naivebayes'
+    classifier = 'adaline_with_adagrad'
     
     # SELECT PERCENT OF POISONING
-    #perc_poisoning = [0] # No Attack
+    perc_poisoning = [0] # No Attack
     #perc_poisoning = [10, 20, 30] # Attack
-    perc_poisoning = [30]
+    #perc_poisoning = [30]
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]

@@ -39,19 +39,19 @@ def run_classifier(features, labels, X_test, Y_test,
         
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():
-    df_x = pd.read_csv('../Datasets/HamAttackData/lingspam/30_perc_poison/X_train_0.csv', header = None)
+    df_x = pd.read_csv('../Datasets/TrainData/enron/X_train_0.csv', header = None)
     x = np.array(df_x)
     
-    df_y = pd.read_csv('../Datasets/HamAttackData/lingspam/30_perc_poison/y_train_0.csv', header = None)
+    df_y = pd.read_csv('../Datasets/TrainData/enron/y_train_0.csv', header = None)
     y = np.array(df_y)
    
-    df_x_test = pd.read_csv('../Datasets/TestData/lingspam/X_test_0.csv', header = None)
+    df_x_test = pd.read_csv('../Datasets/TestData/enron/X_test_0.csv', header = None)
     x_test = np.array(df_x_test)
     
-    df_y_test = pd.read_csv('../Datasets/TestData/lingspam/y_test_0.csv', header = None)
+    df_y_test = pd.read_csv('../Datasets/TestData/enron/y_test_0.csv', header = None)
     y_test = np.array(df_y_test)
 
-    classifier = 'adaline'
+    classifier = 'adaline_with_adagrad'
     
     if classifier is not 'naivebayes':
         x = addBias(x)
