@@ -360,10 +360,10 @@ def main():
     dataset='enron'
     
     ## SELECT ATTACK ('No', 'Dict', 'Empty', 'Ham', 'Ham2')
-    attack='Ham2'
+    attack='Dict'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
-    classifier = 'adaline_with_adagrad'
+    classifier = 'adaline_with_adadelta'
     
     # SELECT PERCENT OF POISONING
     #perc_poisoning = [0] # No Attack
