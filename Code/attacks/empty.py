@@ -19,16 +19,19 @@ def poisonData(features, labels,
     '''
     Returns the input data with *replaced* data that is crafted specifically to
     cause a poisoning empty attack, where all features are set to zero.
-    Inputs:
+    
+    Input:
     
     - features: N * D Numpy matrix of binary values (0 and 1)
                 with N: the number of training examples
                 and  D: the number of features for each example
-    - labels: N * 1 Numpy vector of binary values (-1 and 1)
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
     - percentage_samples_poisoned: float between 0 and 1
-        percentage of the dataset under the attacker's control
+                                   fraction of the dataset under the attacker's control
+    - percentage_features_poisoned: float between 0 and 1
+                                    fraction of knowledge the attacker has of the feature set
         
-    Outputs:
+    Output:
     - X: poisoned features
     - Y: poisoned labels
     '''

@@ -10,7 +10,6 @@ Inject malicious points indicative of ham email.
 Assumes no bias has been added yet.
 '''
 import numpy as np
-import pandas as pd
 from sklearn.metrics import mutual_info_score
 
 def select_using_frequency(features, labels, threshold=0, ham_label=0):
@@ -47,25 +46,13 @@ def select_most_present(features, labels, threshold=0, ham_label=0):
 
     return salient_indices
 
-
-def select_using_MI(features, labels, threshold=0.1, ham_label=0):
+def select_using_MI(features, labels, threshold=.1, ham_label=0):
     '''
     Returns indices of the most salient features for the ham class, using a
     mutual information score between feature values and class label, and
     from the highest scoring, filtering the ones that are most present
     in spam relatively. This makes sense since we then use these indices
     to choose which features to turn on in emails
-    TODO or I could keep all the highest MI score features, and if more
-         present in ham, I set it to 1, else I set it to zero
-         requires extra array somewhere though
-         Thinking about it, this is already what is happening since the ham
-         malicious instances already have all their features set to zero
-         (but this proportion of features controlled by the attacker could
-         vary ? depending on attacket's dataset knowledge ? ie. malicious
-         instances' feature values could be initialised randomly, or drawn from a
-         spammy dicstribution to mimick an email that still has a malicious
-         potential (although this isn't necessary since we are doing a poison,
-         not evasion attack); then compare this to initialised with 0s or with 1s
     '''
     X, Y = features, np.ravel(labels)
     N, D = X.shape
@@ -86,7 +73,6 @@ def select_using_MI(features, labels, threshold=0.1, ham_label=0):
 
     return salient_indices
 
-
 def poisonData(features, labels,
                ## params
                percentage_samples_poisoned,
@@ -100,18 +86,20 @@ def poisonData(features, labels,
     Returns the input data with *replaced* data that is crafted specifically to
     cause a poisoning ham attack, where features of the contaminating emails
     are selected because they are indicative of the ham class.
-    Inputs:
+    
+    Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
         with N: the number of training examples
         and  D: the number of features for each example
-    - labels:   N * 1 Numpy vector of binary values (-1 and 1)
+    - labels: N * 1 Numpy vector of binary values (-1 and 1)
     - percentage_samples_poisoned: float between 0 and 1
-        percentage of the dataset under the attacker's control
+                                   fraction of the dataset under the attacker's control
     - percentage_features_poisoned: float between 0 and 1
-        percentage of the features under the attacker's control
+                                    fraction of the features under the attacker's control
     - feature_selection_method: string
-    - threshold: percentile of features to keep
-    Outputs:
+    - threshold: fraction of features to keep
+    
+    Output:
     - X: N * D poisoned features
     - Y: N * 1 poisoned labels
     '''
@@ -124,7 +112,6 @@ def poisonData(features, labels,
 
     ## find the most salient features, indicative of the ham class
     salient_indices = feature_selection_method(X, Y)
-    #print salient_indices
 
     no_salient_indices = len(salient_indices)
     
@@ -134,7 +121,6 @@ def poisonData(features, labels,
     ## randomly replace some samples with the poisoned ones
     ## so that total number of samples doesn't change
     poisoned_indices = np.random.choice(N, num_poisoned,replace=False)
-    #print poisoned_indices    
 
     X[poisoned_indices] = 0
 
@@ -145,34 +131,3 @@ def poisonData(features, labels,
     Y[poisoned_indices] = spam_label
 
     return (X, Y)
-
-# Main function to test the ham attack
-def main():
-    x = np.array([[1, 0, 1],		
-        [0, 0, 0],		
-        [1, 0, 1],		
-        [1, 1, 1],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [1, 1, 0],		
-        [0, 1, 0]],		
-        dtype=np.int8)		
-    y = np.array([[1],		
-        [1],		
-        [1],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [0],		
-        [1]],		
-        dtype=np.int8) #* 2 - 1		
-
-    print poisonData(x,y,.1)
-
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()

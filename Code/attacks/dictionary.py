@@ -41,8 +41,7 @@ def vary_attack_points(no_poisoned, D, d, threshold):
         
     return attack_points
     
-
-def simple(no_poisoned, D, d, **kwargs):
+def attack_data(no_poisoned, D, d, *args):
     '''
     Returns crafted attack instances. Takes advantage of the attacker's
     full feature knowledge and generates copies of the same attack point.
@@ -62,13 +61,12 @@ def simple(no_poisoned, D, d, **kwargs):
     attack_points = np.array([rand_features,] * no_poisoned)
     
     return attack_points
-    
 
 def poisonData(features, labels, 
                ## params
                percentage_samples_poisoned,
                percentage_features_poisoned=1.0,
-               generate_attack_data=simple,
+               generate_attack_data=attack_data,
                threshold=1.0,
                ham_label=0,
                spam_label=1,
@@ -87,6 +85,7 @@ def poisonData(features, labels,
                                    fraction of the dataset under the attacker's control
     - percentage_features_poisoned: float between 0 and 1
                                     fraction of knowledge the attacker has of the feature set
+    - generate_attack_data: string
     - threshold: float between 0 and 1
                  fraction of known features the attacker uses in point generation; randomness
     
@@ -104,11 +103,10 @@ def poisonData(features, labels,
     attack_points = generate_attack_data(no_poisoned, D, d, threshold)
     
     ## randomly replace some samples with the poisoned ones
-    ## so that total number of samples doesn't change
+    ## so that total number of samples remains unchanged
     poisoned_indices = np.random.choice(N, no_poisoned, replace=False)
         
     X[poisoned_indices] = attack_points
     Y[poisoned_indices] = spam_label # Contamination Assumption
     
-    return (X, Y)
-    
+    return (X, Y)    
