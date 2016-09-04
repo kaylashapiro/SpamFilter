@@ -55,11 +55,15 @@ def fit(features, labels,
         
     Inputs:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
+                with N: the number of training examples
+                and  D: the number of features for each example
     - labels:   N * 1 Numpy vector of binary values (0 and 1)
     - learning_rate: float between 0 and 1
     - initial_weights: D * 1 Numpy vector, beginning weights
+    - convergence_threshold: float, very small number; e.g. 1e-5
+    - convergence_look_back: int, >= 1
+                             stops if the error difference hasn't been over threshold
+                             for the last X epochs
         
     Output:
     - W: D * 1 Numpy vector of real values

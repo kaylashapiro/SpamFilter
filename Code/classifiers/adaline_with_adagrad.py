@@ -10,12 +10,9 @@ rate (ADAGRAD).
 '''
 import sys
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 sys.path.insert(0, '../helpers')
 
-from metrics import computeError
 from adagrad import adagrad 
 
 def calculate_output(X, W):
@@ -27,7 +24,7 @@ def computeCost(Y, O):
     
     Input:
     - Y: N * 1 Numpy vector of binary labels
-                  with N: the number of examples
+         with N: the number of examples
     - O: N * 1 Numpy vector of predicted values
     
     Output:
@@ -56,22 +53,22 @@ def fit(features, labels,
     
     /!\ Assumes bias term is already in the features input.
         
-    Inputs:
+    Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
-    - labels:   N * 1 Numpy vector of binary values (-1 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - labels:   N * 1 Numpy vector of binary values (0 and 1)
     - learning_rate: learning rate, a float between 0 and 1
     - initial_weights: D * 1 Numpy vector, beginning weights
     - convergence_threshold: float, very small number; e.g. 1e-5
     - convergence_look_back: int, >= 1
                              stops if the error difference hasn't been over threshold
                              for the last X epochs
+                             
     Output:
     - W: D * 1 Numpy vector of real values
     '''           
-    
-    ## 0. Prepare notations
+    ## notation
     X, Y = features, labels
     N, D = features.shape   # N #training samples; D #features
     
@@ -97,14 +94,14 @@ def predict(features, weights,
     '''
     Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
+                with N: the number of training examples
+                and  D: the number of features for each example
     - weights: D * 1 Numpy vector of real values
     
     /!\ Assumes bias term is already in the features input.
     
     Output:
-    - T: N * 1 Numpy vector of binary prediction values
+    - T: N * 1 Numpy vector of binary prediction values (0 and 1)
     '''
     
     ## notation

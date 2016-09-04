@@ -49,11 +49,11 @@ def fit(features, labels,
     and corresponding label inputs) for the ADALINE model.
     These weights are found using the gradient descent method.
         
-    Inputs:
+    Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
                 with N: the number of training examples
                 and  D: the number of features for each example
-    - labels:   N * 1 Numpy vector of binary values (-1 and 1)
+    - labels:   N * 1 Numpy vector of binary values (0 and 1)
     - learning_rate: float between 0 and 1
     - initial_weights: D * 1 Numpy vector, beginning weights
     
