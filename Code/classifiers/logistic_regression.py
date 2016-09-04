@@ -76,13 +76,15 @@ def fit(features, labels,
                 with N: the number of training examples
                 and  D: the number of features for each example
     - labels: N * 1 Numpy vector of binary feature values (0 and 1)
+    - learning_rate: float between 0 and 1
+    - initial_weights: D * 1 Numpy vector, beginning weights
     
     Output:
     - W: D * 1 Numpy vector of float weights of trained classifier
     '''  
     ## notation
     X, Y = features, labels
-    N, D = X.shape
+    N, D = X.shape   # N #training samples; D #features
     
     W = gradient_descent(X, Y,
                          calculate_output,

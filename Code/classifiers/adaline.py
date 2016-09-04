@@ -9,12 +9,9 @@ Training is done using batch gradient descent.
 '''
 import sys
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 
 sys.path.insert(0, '../helpers')
-from metrics import computeError
-from add_bias import addBias
+
 from gradientdescent import gradient_descent 
 
 def calculate_output(X, W):
@@ -48,7 +45,6 @@ def fit(features, labels,
         convergence_look_back=2,
         ham_label=0,
         spam_label=1,
-        verbose=True,
         ):
     '''
     Returns the optimal weights for a given training set (features
@@ -61,18 +57,16 @@ def fit(features, labels,
     - features: N * D Numpy matrix of binary values (0 and 1)
         with N: the number of training examples
         and  D: the number of features for each example
-    - labels:   N * 1 Numpy vector of binary values (-1 and 1)
+    - labels:   N * 1 Numpy vector of binary values (0 and 1)
+    - learning_rate: float between 0 and 1
     - initial_weights: D * 1 Numpy vector, beginning weights
-    - learning_rate: learning rate, a float between 0 and 1
-    - termination_condition: returns a bool
-    
+        
     Output:
     - W: D * 1 Numpy vector of real values
     '''           
-    
-    ## 0. Prepare notations
+    ## notation
     X, Y = features, labels
-    N, D = features.shape   # N #training samples; D #features
+    N, D = X.shape   # N #training samples; D #features
     
     W = gradient_descent(X, Y,
                          calculate_output,
@@ -89,7 +83,7 @@ def fit(features, labels,
     return W
 
 
-def predict(features, weights,
+def predict(features, parameters,
         ## params
         ham_label=0,
         spam_label=1,
@@ -97,18 +91,19 @@ def predict(features, weights,
     '''
     Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
-    - weights: D * 1 Numpy vector of real values
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - parameters: output of fit method
+                  D * 1 Numpy vector of current float weights of classifier
     
     /!\ Assumes bias term is already in the features input.
     
     Output:
-    - T: N * 1 Numpy vector of binary prediction values
+    - T: N * 1 Numpy vector of binary prediction values (0 and 1)
     '''
     
     ## notation
-    X, W = features, weights
+    X, W = features, parameters
     N, D = features.shape
     
     ## apply model
