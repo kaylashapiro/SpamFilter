@@ -91,7 +91,7 @@ def poisonData(features, labels,
     - features: N * D Numpy matrix of binary values (0 and 1)
         with N: the number of training examples
         and  D: the number of features for each example
-    - labels: N * 1 Numpy vector of binary values (-1 and 1)
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
     - percentage_samples_poisoned: float between 0 and 1
                                    fraction of the dataset under the attacker's control
     - percentage_features_poisoned: float between 0 and 1
