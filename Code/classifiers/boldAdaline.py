@@ -17,7 +17,7 @@ from metrics import computeError
 
 def computeCost(trueValues, predictions):
     '''
-    Calculate cost using means squared
+    Calculate cost using means squared.
     
     Input:
     - trueValues: N * 1 Numpy vector of binary labels
@@ -51,8 +51,8 @@ def fit(features, labels,
         
     Inputs:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
+                with N: the number of training examples
+                and  D: the number of features for each example
     - labels:   N * 1 Numpy vector of binary values (-1 and 1)
     - learning_rate: float between 0 and 1
     - initial_weights: D * 1 Numpy vector, beginning weights
@@ -110,26 +110,18 @@ def fit(features, labels,
             current_error = computeError(T, Y)
             error.append(current_error)
             learning_rate = learning_rate*1.05
-            #print 'LEARNING RATE INCREASED TO:', learning_rate
         elif (current_error - last_epoch_error > 1e-8):
             learning_rate = learning_rate*.5
             W = last_W
             epoch -= 1
             current_error = 1e10
-            #print 'LEARNING RATE DECREASED TO:', learning_rate
-            #print 'UNDO ITERATION!!!!!!'
         else:
             current_error = computeError(T, Y)
             error.append(current_error)
             
-        #if (epoch > 50 and np.abs(last_epoch_error - current_error) < threshold):
-        #    break
-            
         epoch += 1
             
         last_epoch_error = current_error
-
-        #if verbose and (epoch%1 == 0): print('iteration %d:\tcost = %.3f \terror = %.3f' % (epoch, cost[-1], error[-1]))
        
     return W
 
@@ -143,8 +135,8 @@ def predict(features, weights,
     '''
     Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
-        with N: the number of training examples
-        and  D: the number of features for each example
+                with N: the number of training examples
+                and  D: the number of features for each example
     - weights: D * 1 Numpy vector of real values
     
     Output:
