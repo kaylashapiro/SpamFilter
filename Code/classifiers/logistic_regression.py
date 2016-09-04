@@ -8,13 +8,9 @@ Training is done using stochastic gradient descent.
 
 import sys
 import numpy as np
-import pandas as pd
-from sklearn.metrics import confusion_matrix, roc_curve, auc
-import matplotlib.pyplot as plt
 
 sys.path.insert(0, '../helpers')
-from metrics import computeError
-from add_bias import addBias
+
 from gradientdescent import gradient_descent
 
 def sigmoid(z):
@@ -41,7 +37,7 @@ def computeCost(trueValues, predictions):
     Returns the average cost associated with each prediction for an
     example given its true value.
     
-    Inputs:
+    Input:
     - trueValues:  N * 1 Numpy vector of binary values (0 and 1)
                    with N: the number of training examples
     - predictions: N * 1 Numpy vector of float values between 0 
@@ -75,16 +71,11 @@ def fit(features, labels,
     
     /!\ Assumes bias term is already in the features input.
     
-    Inputs:
-    - X: N * D Numpy matrix of binary feature values (0 and 1)
-         with N: the number of training examples
-         and  D: the number of features for each example
-    - y: N * 1 Numpy vector of binary feature values (0 and 1)
-    - alpha: float; stepsize to take along the gradient
-    - epochs: integer; number of full passes through the training set
-    - threshold: float termination condition; if error produced in
-                 an epoch is within the threshold of the error produced
-                 in the previous epoch, then break
+    Input:
+    - features: N * D Numpy matrix of binary feature values (0 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - labels: N * 1 Numpy vector of binary feature values (0 and 1)
     
     Output:
     - W: D * 1 Numpy vector of float weights of trained classifier
@@ -107,14 +98,14 @@ def fit(features, labels,
     
     return W
     
-def predict(X, W):
+def predict(features, parameters):
     '''
-    Inputs:
-    - X: N * D Numpy matrix of binary feature values (0 and 1)
-         with N: the number of training examples
-         and  D: the number of features for each example
-    - W: D * 1 Numpy vector of current float weights of classifier
-    - add_bias: default boolean
+    Input:
+    - features: N * D Numpy matrix of binary feature values (0 and 1)
+                with N: the number of training examples
+                and  D: the number of features for each example
+    - parameters: output of fit method
+                  D * 1 Numpy vector of current float weights of classifier
     
     /!\ Assumes bias term is already in the X input.
     
@@ -122,9 +113,9 @@ def predict(X, W):
     - predictions: N * 1 Numpy vector of binary values (0 and 1);
                    predicted classes
     '''
-    probs = calculate_output(X, W)
+    probs = calculate_output(features, parameters)
     
-    predictions = np.zeros((X.shape[0],1))   
+    predictions = np.zeros((features.shape[0],1))   
     predictions[probs>0.5] = 1
     
     return predictions   
