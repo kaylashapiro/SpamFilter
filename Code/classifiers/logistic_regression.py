@@ -102,7 +102,7 @@ def predict(features, parameters):
     '''
     Input:
     - features: N * D Numpy matrix of binary feature values (0 and 1)
-                with N: the number of training examples
+                with N: the number of examples
                 and  D: the number of features for each example
     - parameters: output of fit method
                   D * 1 Numpy vector of current float weights of classifier

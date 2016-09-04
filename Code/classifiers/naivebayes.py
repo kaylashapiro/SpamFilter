@@ -5,21 +5,15 @@ Adapted from: https://github.com/galvanic/adversarialML/blob/master/classifiers/
 
 Inspired by Luis Munoz's MATLAB code for the Naive Bayes classifier model.
 '''
-import sys
-import numpy as np
-import pandas as pd
-from sklearn.naive_bayes import BernoulliNB
 
-sys.path.insert(0, '../helpers')
-from metrics import computeError
+import numpy as np
 
 def process_parameters(p, tolerance=1e-10):
     '''
     Helper function for training naivebayes.
     Returns parameters where NaNs, zeros and ones have been modified to avoid
-    under/overflows (??)
+    under/overflows
     Helper function for the training function.
-    TODO write better docstring and explanation
     '''
     p[np.isnan(p)] = tolerance
     p[p == 0]      = tolerance
@@ -34,18 +28,18 @@ def fit(features, labels,
         **kwargs
         ):
     '''
-    Returns the parameters for a Naive Bayes model
+    Returns the parameters for a naive Bayes model.
     
     Logs are used because otherwise multiplications of very small numbers,
     which leads to problems of over/underflows
         
-    Inputs:
+    Input:
     - features: N * D Numpy matrix of binary values (0 and 1)
                 with N: the number of training examples
                 and  D: the number of features for each example
-    - labels:   N * 1 Numpy vector of binary values (0 and 1)
+    - labels: N * 1 Numpy vector of binary values (0 and 1)
     
-    Outputs:
+    Output:
     - parameters
     '''
     ## setup
@@ -72,16 +66,17 @@ def fit(features, labels,
 
     return prior_ham, prior_spam, likeli_ham, likeli_spam
 
-
 def predict(features, parameters,
         ## params
         ham_label=0,
         spam_label=1,
         ):
     '''
-    Inputs:
-    - parameters: model parameters
-    - features
+    Input:
+    - features: N * D Numpy matrix of binary feature values (0 and 1)
+                with N: the number of examples
+                and  D: the number of features for each example
+    - parameters: naive Bayes model parameters
     
     Outputs:
     - predicted: labels
