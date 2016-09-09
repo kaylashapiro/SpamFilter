@@ -107,4 +107,4 @@ def predict(features, parameters,
     if ham_label == -1:
         predicted = predicted * 2 - 1
 
-    return np.array(predicted).astype(int) #To match the format of my other classifiers and for bagging
+    return np.array(predicted).astype(int) #to match the format of my other classifiers and for bagging
