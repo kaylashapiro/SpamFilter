@@ -13,9 +13,6 @@ import sys
 import importlib
 import numpy as np 
 import random
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.cross_validation import train_test_split
 
 sys.path.insert(0, '../classifiers')
 sys.path.insert(0, '../helpers')
@@ -146,27 +143,3 @@ def computeClass(votes, ith_predictor):
     votes[votes>.5] = 1
     
     return votes
-    
-
-# Main function to run algorithm on various fractions of attacker knowledge and control.
-def main():
-    df_x = pd.read_csv('../../Datasets/TrainData/enron/X_train_1.csv', header = None)
-    x = np.array(df_x)
-    
-    df_y = pd.read_csv('../../Datasets/TrainData/enron/y_train_1.csv', header = None)
-    y = np.array(df_y)
-   
-    df_x_test = pd.read_csv('../../Datasets/TestData/enron/X_test_1.csv', header = None)
-    x_test = np.array(df_x_test)
-    
-    df_y_test = pd.read_csv('../../Datasets/TestData/enron/y_test_1.csv', header = None)
-    y_test = np.array(df_y_test)
-    
-    no_predictors = 3
-    
-    print bagPredictors(x, y, x_test, y_test, no_predictors, classifier='logistic_regression')
-    
-    
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()
