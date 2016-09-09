@@ -12,6 +12,10 @@ def metric_vs_perc_poisoning(classifier, dataset, attack,
                              metric,
                              include_baggers=False,
                              ):
+    '''
+    Method to plot a given bagged attack scenario with a y- axis metric
+    vs x-axis percent poisoning.
+    '''
     metrics = {
         'Error Rate': 0,
         'TPR': 1,
@@ -40,7 +44,7 @@ def metric_vs_perc_poisoning(classifier, dataset, attack,
         for line in xrange(num_lines_to_plot):
             plt.plot(X, data[line], label=get_label(num_baggers, line))
         if y_axis_metric == 0:
-            legend = plt.legend(loc='upper left', shadow=True, prop={'size':12})
+            legend = plt.legend(loc='lower left', shadow=True, prop={'size':12})
     
     title = classifier_name + ' (' + get_attack_name(attack) + ')'
     
@@ -120,7 +124,8 @@ def get_attack_name(attack, percent_poisoning=None):
     attacks = {
         'Dict': 'Dictionary Attack',
         'Empty': 'Empty Attack',
-        'Ham': 'Ham Attack',
+        'Ham': 'Frequency Ham Attack',
+        'Ham2': 'MI Ham Attack',
     }
     
     attack_name = attacks[attack]
@@ -136,6 +141,9 @@ def get_filename(classifier,
         'adaline' : 'AD_',
         'logistic_regression' : 'LR_',
         'naivebayes' : 'NB_',
+        'adaline_with_adagrad': 'ADG_',
+        'adaline_with_adadelta': 'ADD_',
+        'boldAdaline': 'BA_',
     }
     
     classifier_name = classifier_names[classifier]
@@ -154,15 +162,9 @@ def get_filename(classifier,
 
 def main():
     classifier = 'logistic_regression'
-    #dataset = 'enron'
-    #attack = 'Ham'
-    
-    
-    #metric = 'FPR'
-    
-    
-    datasets = ['enron', 'lingspam']
-    attacks = ['Dict', 'Empty', 'Ham']
+
+    datasets = ['enron']
+    attacks = ['Dict', 'Empty', 'Ham', 'Ham2']
     percent_poisoning = [10, 20, 30]
     num_baggers = [3, 5, 10, 20, 50]
     metrics = ['Error Rate', 'TPR', 'FPR', 'FNR', 'TNR', 'AUC']
@@ -179,11 +181,7 @@ def main():
                                                 metric,
                                                 include_baggers)
 
-                name = get_filename(classifier, dataset, attack, metric, include_baggers)                                
-                print name
-                path = '../Plots/bagging/'
-                plot.savefig(path + name)
-                plot.gcf().clear()
+                plot.show()
     
     return
     

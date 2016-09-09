@@ -5,6 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def bag_vs_base_plot(classifier, dataset, attack, percent_poisoning, metric):
+    '''
+    Method to plot y-axis metric vs x-axis number of baggers.
+    Plots clean and poisoned data
+    '''
     metrics = {
         'Error Rate': 0,
         'TPR': 1,
@@ -99,6 +103,9 @@ def get_classifier_name(classifier, percent_poisoning=None):
         'adaline': 'Adaline',
         'logistic_regression': 'Logistic Regression',
         'naivebayes': 'Naive Bayes',
+        'boldAdaline': 'Bold Adaline',
+        'adaline_with_adagrad': 'Adaline with AdaGrad',
+        'adaline_with_adadelta': 'Adaline with AdaDelta',
     }
     
     classifier_name = classifiers[classifier]
@@ -128,8 +135,8 @@ def main():
     classifier = 'logistic_regression'
     dataset = 'enron'
     attack = 'Dict'
-    percent_poisoning = 30
-    metric = 'FNR'
+    percent_poisoning = 10
+    metric = 'Error Rate'
     
     plot = bag_vs_base_plot(classifier, dataset, attack, percent_poisoning, metric)
     plot.show()
