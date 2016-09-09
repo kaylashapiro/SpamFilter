@@ -25,28 +25,4 @@ def labelSwitching(y, perc_label_switching):
     y[select_labels] = 1 - y[select_labels]
     
     return y
-
-def main():
-    '''Test Label Switching'''
-    ## dummy data
     
-    y = np.array([[1],
-                  [1],
-                  [1],
-                  [0],
-                  [0],
-                  [0],
-                  [0],
-                  [0],
-                  [0],
-                  [1]],
-                  dtype=np.int8) #* 2 - 1                 
-                  
-    print y
-    
-    print labelSwitching(y, .1)
-        
-    
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()

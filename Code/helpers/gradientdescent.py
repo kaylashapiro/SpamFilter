@@ -79,9 +79,7 @@ def gradient_descent(features, labels,
                              for the last X epochs.
     
     Output:
-    - W: D * 1 Numpy vector of real values
-    
-    TODO adaptive learning rate
+    - W: D * 1 Numpy vector of real values    
     '''    
     ## notation
     X, Y = features, labels

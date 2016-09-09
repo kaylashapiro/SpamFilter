@@ -45,6 +45,7 @@ def adadelta(features, labels,
                              for the last X epochs.
     - smoothing_term: very small number; e.g. 1e-8,
                       ensure no divide by zero error.
+    - decay: squared gradient window.
     
     Output:
     - W: D * 1 Numpy vector of real values

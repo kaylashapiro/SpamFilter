@@ -9,7 +9,6 @@ from the original training set.
 
 import numpy as np 
 import random
-import pandas as pd
 import sys
     
 def generateReplicate(X, y, percent_instances=1):
@@ -69,30 +68,3 @@ def generateBootstraps(X, y, n_replicates, percent_instances=1):
         with open(out_name, 'wb') as ofile:
             np.savetxt(ofile, replicate, fmt='%u', delimiter=',')
         
-        
-# Main function to create bootstrap replicate sets.
-# argv[1] := number of replicates to generate.
-def main():
-    if len(sys.argv) >= 2:
-        n_replicates = int(sys.argv[1])
-    else:
-        n_replicates = 25
-  
-    new_instances = 5
-  
-    # Let's get a dataset up in this bizniz
-    df_X = pd.read_csv('test.csv', header = None)
-    X = np.array(df_X)
-    print X
-    
-    df_y = pd.read_csv('test_y.csv', header = None)
-    y = np.array(df_y)
-    print y
-  
-    [X, y] = generateReplicate(X, y)
-    print X
-    print y
-
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()

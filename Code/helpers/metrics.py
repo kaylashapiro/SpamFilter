@@ -1,7 +1,7 @@
 # coding: utf-8
 
 import numpy as np
-from sklearn.metrics import confusion_matrix, roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score
 
 def computeError(y, predictions):
     '''
@@ -68,7 +68,9 @@ def computeRates(Y, O, ham_label, spam_label):
 
 def get_FPR(Y, O, ham_label, spam_label):
     '''
-    Calculates False Positive Rate (=fall-out), also called false alarm rate
+    Adapted from: https://github.com/galvanic/adversarialML/blob/master/helpers/performance.py
+    
+    Calculates false positive rate
     
     Input:
     - Y: N * 1 Numpy vector of binary values (0 and 1); class labels
@@ -85,7 +87,9 @@ def get_FPR(Y, O, ham_label, spam_label):
 
 def get_TPR(Y, O, ham_label, spam_label):
     '''
-    Calculates True Positive Rate
+    Adapted from: https://github.com/galvanic/adversarialML/blob/master/helpers/performance.py
+    
+    Calculates true positive rate
     
     Input:
     - Y: N * 1 Numpy vector of binary values (0 and 1); class labels
@@ -100,12 +104,3 @@ def get_TPR(Y, O, ham_label, spam_label):
     TPR = float(TP) / P
     return TPR
     
-def main():  
-    y_true = np.array([0, 0, 1, 1])
-    y_scores = np.array([0, 0, 0, 0])
-    print computeRates(y_true, y_scores, 0, 1)
-    
-    
-# This is the standard boilerplate that calls the main() function.
-if __name__ == '__main__':
-    main()
