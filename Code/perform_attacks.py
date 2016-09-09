@@ -10,9 +10,9 @@ sys.path.insert(0, 'attacks')
 def performAttack(frac_knowl=1, 
                   perc_poisoning=[10, 20, 30], 
                   no_iterations=10,
-                  attack=None,
-                  attack_folder=None,
-                  dataset=None):
+                  attack='Dict',
+                  attack_folder='DictAttackData',
+                  dataset='enron'):
     '''
     Performs attacks on no_iterations training sets at various poisoning levels
     and saves them to .csv files.
@@ -24,8 +24,9 @@ def performAttack(frac_knowl=1,
     - no_iterations: Integer number of training sets to iterate through and attacks
                      to generate at each perc_poisoning
     - attack: string; choose from 1) 'dictionaryAttack' 2) 'emptyAttack'
-    - attack_folder: string; choose from 1) 'DictAttackData' 2) 'EmptyAttackData'
-    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
+    - attack_folder: string; choose from 1) 'DictAttackData' 2) 'EmptyAttackData' 
+                     3) 'HamAttackData'
+    - dataset: string; choose from 1) 'enron'
     
     Output:
     NONE
@@ -35,7 +36,7 @@ def performAttack(frac_knowl=1,
     except ImportError as error:
         print error
         print "Failed to import attack module in performAttacks.py"
-        print "Available attack modules: 1) 'dictionaryAttack' 2) 'emptyAttack'"
+        print "Available attack modules: 1) 'dictionary' 2) 'empty' 3) 'ham'"
         sys.exit(0)
         
     path = '../Datasets/' + attack_folder + '/' + dataset + '/'
@@ -52,8 +53,6 @@ def performAttack(frac_knowl=1,
         y_train = np.array(df_y_train)
         
         for perc in perc_poisoning:
-            print 'ATTACK', iter
-            print 'POISONING', perc
             folder = str(perc) + '_perc_poison/'
             perc = float(perc)/100
             
@@ -75,7 +74,7 @@ def performAttack(frac_knowl=1,
     
 # Main function to run algorithm on various fractions of attacker knowledge and control.
 def main():    
-    performAttack(attack='empty',attack_folder='EmptyAttackData',dataset='lingspam')
+    performAttack()
     
     
 # This is the standard boilerplate that calls the main() function.
