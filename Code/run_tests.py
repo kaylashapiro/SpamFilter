@@ -1,5 +1,10 @@
 # coding: utf-8
 
+'''
+This was the python script used to run all of the bagging tests in the project.
+An extensive number of computationally expensive experiments were run.
+'''
+
 import sys
 import importlib
 import numpy as np
@@ -29,9 +34,9 @@ def runTests(no_iterations, no_predictors, perc_poisoning, bagging_samples, feat
                        set
     - feature_subsampling: real number between 0 and 1; fraction of features to subsample
     - label_switching: real number between 0 and 1; fraction of labels to switch
-    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham', 4) 'Optimal'
-    - classifier: string; Choose from: 1) 'logisticReg', 2) 'adaline', 3) 'naivebayes'
-    - dataset: string; choose from 1) 'enron' 2) 'lingspam'
+    - attack: string; Choose from: 1) 'Dict', 2) 'Empty', 3) 'Ham'
+    - classifier: string; Choose from: 1) 'logistic_regression', 2) 'adaline', 3) 'naivebayes'
+    - dataset: string; choose from 1) 'enron'
     
     Ouput:
     NONE
@@ -363,12 +368,11 @@ def main():
     attack='Dict'
     
     ## SELECT CLASSIFIER ('logistic_regression', 'adaline', 'naivebayes')
-    classifier = 'adaline_with_adadelta'
+    classifier = 'logistic_regression'
     
     # SELECT PERCENT OF POISONING
     #perc_poisoning = [0] # No Attack
-    #perc_poisoning = [10, 20, 30] # Attack
-    perc_poisoning = [30]
+    perc_poisoning = [10, 20, 30] # Attack
     
     # BAGGING PARAMETERS
     bagging_samples = [.6, .8, 1.0]
